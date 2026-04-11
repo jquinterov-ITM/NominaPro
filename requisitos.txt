@@ -1,0 +1,54 @@
+NominaPro - requisitos de ejecución
+
+Prerrequisitos
+- Python 3.11+ (incluye pip)
+- PostgreSQL (con psycopg[binary] en Prod) / SQLite (Local) 15+
+- Node.js 20+ (solo frontend Vue)
+
+Instalación de Python por comando (Windows)
+Opción 1 (recomendada, winget):
+winget install Python.Python.3.11
+
+Opción 2 (chocolatey):
+choco install python -y
+
+Validar instalación de Python
+python --version
+pip --version
+
+Instalar Node.js para frontend Vue (Windows)
+winget install OpenJS.NodeJS.LTS
+
+Validar Node/npm
+node -v
+npm -v
+
+Si PowerShell bloquea npm (error npm.ps1 / ExecutionPolicy)
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+
+Ejecución del proyecto
+1) Ir a la carpeta NominaPro
+2) Copiar variables de entorno
+3) Crear y activar entorno virtual
+4) Instalar dependencias backend
+5) Iniciar backend FastAPI
+6) Iniciar frontend Vue
+
+Comandos (PowerShell):
+Set-Location "C:\Users\Jhonatan\OneDrive - INSTITUTO TECNOLOGICO METROPOLITANO - ITM\ITM - Especializacion\0. CONSTRUCCIÓN DE SOFTWARE\actividad2\NominaPro"
+Copy-Item .env.example .env
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install -r backend/requirements.txt
+uvicorn app.main:app --reload --app-dir backend
+
+En otra terminal para frontend:
+Set-Location "C:\Users\Jhonatan\OneDrive - INSTITUTO TECNOLOGICO METROPOLITANO - ITM\ITM - Especializacion\0. CONSTRUCCIÓN DE SOFTWARE\actividad2\NominaPro\frontend"
+npm install
+npm run dev
+
+Validación rápida
+curl http://localhost:8000/health
+
+Respuesta esperada
+{"status":"ok","service":"nominapro"}

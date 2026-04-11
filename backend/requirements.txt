@@ -1,0 +1,14 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+psycopg[binary]
+pydantic
+pydantic-settings
+python-dotenv
+PyJWT
+pre-commit
+black
+isort
+python-multipart
+pytest
+pytest-cov
