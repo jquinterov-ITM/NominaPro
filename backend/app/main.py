@@ -1,4 +1,4 @@
-﻿from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
 from fastapi.exceptions import RequestValidationError
@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.requests import Request
 from fastapi.responses import JSONResponse
 
-from .api import auth, empleados, nominas, novedades, parametros
+from .api import auth, empleados, nominas, novedades, parametros, auditoria
 from .core.config import settings
 from .db import models
 from .db.session import Base, engine, ensure_sqlite_nomina_schema
@@ -62,8 +62,16 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
     )
 
 
+@app.get("/health", tags=["health"])
+def health_check():
+    """Verificación rápida de estado del servidor."""
+    return {"status": "ok"}
+
+
 app.include_router(parametros.router, prefix="/api/parametros", tags=["parametros"])
 app.include_router(empleados.router, prefix="/api/empleados", tags=["empleados"])
 app.include_router(novedades.router, prefix="/api", tags=["novedades"])
 app.include_router(nominas.router, prefix="/api", tags=["nominas"])
 app.include_router(auth.router, prefix="/api", tags=["auth"])
+app.include_router(auditoria.router, prefix="/api/auditoria", tags=["auditoria"])
+

@@ -204,22 +204,14 @@ Authorization: Bearer <token>
 
 ## Endpoints utiles
 
-- `GET /api/empleados/` lista empleados.
-- `POST /api/empleados/` crea empleados.
-- `GET /api/novedades/` lista novedades.
-- `POST /api/nominas/liquidar` liquida y guarda nominas.
-- `GET /api/nominas/` lista nominas persistidas.
-- `DELETE /api/nominas/{id}` elimina una nomina.
+- `GET /api/novedades/` lista novedades. Soporta filtros por query: `?empleado_id=` y `?periodo=`.
+- `GET /api/nominas/` lista nóminas persistidas. Soporta filtro por periodo: `?periodo=YYYY-MM`.
+- `POST /api/auditoria/` registra eventos de auditoría (restringido a roles `RH_ADMIN`).
+- `GET /api/auditoria/` lista eventos de auditoría (restringido a roles `RH_ADMIN`).
 
 ## Ejemplos de uso
 
-### Obtener token
-
-```cmd
-curl -X POST http://localhost:8000/api/auth/token ^
-	-H "Content-Type: application/x-www-form-urlencoded" ^
-	-d "username=admin&password=secret"
-```
+- Auditoría y trazabilidad: tabla `auditoria` y endpoints para registrar/consultar eventos administrativos (acceso RH_ADMIN).
 
 Respuesta esperada:
 

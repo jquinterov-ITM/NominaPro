@@ -75,7 +75,11 @@ Documento operativo para que los agentes ejecuten NominaPro **desde cero**, real
 
 ---
 
-## Workflow A – Crear nuevo módulo CRUD backend
+## Workflows y Guías de Ejecución
+
+El proyecto cuenta con comandos y directrices específicas. Si estás en un entorno nuevo, estas son las instrucciones funcionales para cada workflow (alineadas con los comandos en `.agents/workflows`):
+
+### 1. `/crear-modulo-crud-backend` (Crear nuevo módulo CRUD backend)
 
 **Uso**: agregar un recurso nuevo (ej: centros de costo).
 
@@ -86,12 +90,11 @@ Documento operativo para que los agentes ejecuten NominaPro **desde cero**, real
 4. Ajustar modelos/tablas en `backend/app/db/models.py` y sesión según necesidad.
 5. Registrar router en `backend/app/main.py` bajo `/api/{modulo}`.
 6. Validar casos: éxito, validación inválida, no encontrado.
-7. Documentar endpoints y reglas en `docs/backend.md` y `docs/02-funcional.md`.
+7. Documentar endpoints y reglas en `docs/05-backend.md` y `docs/02-funcional.md`.
 
----
-## Workflow B – Ampliar módulo existente
+### 2. `/agregar-endpoint` (Ampliar módulo existente)
 
-**Uso**: ampliar `empleados`, `novedades`, `nominas`, `parametros`.
+**Uso**: ampliar o modificar módulos actuales (`empleados`, `novedades`, `nominas`, `parametros`).
 
 **Pasos**:
 1. Revisar router actual en `backend/app/api/{modulo}.py`.
@@ -100,9 +103,9 @@ Documento operativo para que los agentes ejecuten NominaPro **desde cero**, real
 4. Probar compatibilidad con frontend existente.
 5. Actualizar documentación del módulo.
 
-## Workflow C – Refactor por capas sin romper API
+### 3. `/code-review` (Refactor por capas sin romper API)
 
-**Uso**: mejorar mantenibilidad sin cambiar contratos.
+**Uso**: mejorar mantenibilidad sin cambiar contratos y corregir código.
 
 **Pasos**:
 1. Identificar lógica extensa en rutas.
@@ -111,7 +114,7 @@ Documento operativo para que los agentes ejecuten NominaPro **desde cero**, real
 4. Validar endpoints existentes (regresión mínima).
 5. Documentar cambios técnicos internos.
 
-## Workflow D – Seguridad incremental
+### 4. Seguridad incremental (Manual)
 
 **Uso**: endurecer la API gradualmente.
 
@@ -122,9 +125,9 @@ Documento operativo para que los agentes ejecuten NominaPro **desde cero**, real
 4. Registrar eventos críticos sin exponer datos sensibles.
 5. Actualizar `docs/04-seguridad.md`.
 
-## Workflow E – Validación y pruebas mínimas
+### 5. `/escribir-tests` (Validación y pruebas mínimas)
 
-**Uso**: cerrar cambios con evidencia.
+**Uso**: cerrar cambios con evidencia técnica de funcionamiento.
 
 **Casos mínimos**:
 1. Happy path.
@@ -133,27 +136,68 @@ Documento operativo para que los agentes ejecuten NominaPro **desde cero**, real
 4. Flujo extremo a extremo mínimo:
    - empleado → novedad → liquidación de nómina → consulta.
 
-## Workflow F – Documentación funcional/técnica
+### 6. `/documentar-modulo` (Documentación funcional/técnica)
 
 **Uso**: al cerrar un lote de cambios.
 
 **Pasos**:
-1. Actualizar rutas y ejemplos JSON en `docs/backend.md`.
+1. Actualizar rutas y ejemplos JSON en `docs/05-backend.md`.
 2. Actualizar guía de ejecución en `docs/07-implementacion.md`/`README.md` si aplica.
 3. Verificar consistencia entre prompts y documentación.
 
 ---
 
+## Expectativas de Comportamiento (Skills de Agente)
+
+Si estás configurando este proyecto en un entorno vacío o autoinstruyéndote como agente, debes adoptar de manera obligatoria las siguientes disciplinas (o descargar los skills equivalentes si los soporta tu plataforma):
+
+### 7. Comportamiento: Diseño Frontend (`frontend-design`)
+**Enfoque**: Crear interfaces de usuario (Vue 3) que se sientan de alta gama ("premium"), evitando el típico aspecto de "MVP genérico" o IA básica.
+**Pautas**:
+1. Emplear paletas de colores armónicas (rechazar colores primarios planos del navegador).
+2. Utilizar tipografía moderna (ej: Inter, Roboto) e implementar micro-animaciones fluidas (hover, focus).
+3. Asegurar que cada nueva vista cuente con la más alta atención al detalle visual y "glassmorphism" o diseño responsivo estético.
+
+### 8. Comportamiento: Accesibilidad (`accessibility`)
+**Enfoque**: Auditar constructivamente todo código HTML / Vue para su universalidad.
+**Pautas**:
+1. Asegurar cumplimiento de WCAG 2.2 (contrastes, `aria-labels`).
+2. Soportar navegación íntegra por teclado en modales, formularios y tablas.
+
+### 9. Comportamiento: Optimización SEO (`seo`)
+**Enfoque**: Preparar la web para motores de búsqueda (en las vistas que sean públicas).
+**Pautas**:
+1. Manejar adecuadamente los tags `title`, descripciones `meta`, y semántica HTML (`H1`-`H6`).
+
+> **Aclaración Técnica (Node.js vs Python)**: El motor **backend** de NominaPro es y seguirá siendo estrictamente **Python / FastAPI**. Por ello, no se deben usar reglas ni dependencias de servidor en Node.js (ej. *nodejs-backend-patterns* o *Express*). Sin embargo, **Node.js y `npm` SÍ son requeridos y correctos** para instalar dependencias y levantar el entorno del **frontend** (Vue 3 + Vite).
+
+### 10. Resumen numerado al final de cada interaccion.
+**Enfoque**: Prompt template para skill que presenta resumen numerado y solicita selección.
+**Pautas**
+Cuando ejecutes este skill, realiza lo siguiente:
+
+1. Muestra un resumen breve y enumerado de las acciones propuestas (título + resumen).
+2. Ofrece enumeración en formato numérico `1,2,3...` y alernativa alfabética `a,b,c...`.
+3. Pide al usuario seleccionar una o varias opciones (acepta `1` o `a`, y múltiples separadas por coma).
+4. Tras la selección, confirma mostrando la(s) tarea(s) seleccionada(s) con su descripción completa.
+
+Ejemplo breve de prompt (para agentes):
+"""
+Tengo 3 cambios propuestos. Muestra la lista enumerada y pídele al usuario elegir por número o letra. Luego confirma las selecciones con detalles.
+"""
+
+---
+
 ## Uso recomendado de prompts por objetivo
 
-1. `prompt-skill.md`: contexto base + protocolo desde cero.
-2. `prompt-backend.md`: cambios de API y modelo.
-3. `prompt-frontend.md`: cambios UI/Vue.
-4. `prompt-funcional.md`: reglas de negocio de nómina.
-5. `prompt-seguridad.md`: controles y riesgos.
-6. `prompt-calidad.md`: validación y estrategia de pruebas.
-7. `prompt-implementacion.md`: despliegue/operación.
-8. `prompt-arquitectura.md`: decisiones estructurales.
+1. `01-prompt-skill.md`: contexto base + protocolo desde cero.
+2. `03-prompt-backend.md`: cambios de API y modelo.
+3. `04-prompt-frontend.md`: cambios UI/Vue.
+4. `02-prompt-funcional.md`: reglas de negocio de nómina.
+5. `05-prompt-seguridad.md`: controles y riesgos.
+6. `06-prompt-calidad.md`: validación y estrategia de pruebas.
+7. `07-prompt-implementacion.md`: despliegue/operación.
+8. `08-prompt-arquitectura.md`: decisiones estructurales.
 
 ## Regla de oro para agentes
 

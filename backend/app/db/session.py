@@ -91,6 +91,19 @@ def ensure_sqlite_nomina_schema() -> None:
                             f"ALTER TABLE parametros_legales ADD COLUMN {col_name} {col_sql}"
                         )
                     )
+        # Auditoría: si la tabla existe, asegurar columnas `detalle` y `fecha`
+        if "auditoria" in table_names:
+            existing_aud_cols = {
+                column["name"] for column in inspector.get_columns("auditoria")
+            }
+            if "detalle" not in existing_aud_cols:
+                connection.execute(
+                    text("ALTER TABLE auditoria ADD COLUMN detalle TEXT")
+                )
+            if "fecha" not in existing_aud_cols:
+                connection.execute(
+                    text("ALTER TABLE auditoria ADD COLUMN fecha DATETIME DEFAULT (CURRENT_TIMESTAMP)")
+                )
 
 
 ensure_sqlite_nomina_schema()

@@ -27,6 +27,10 @@
 - Ejecutar `npm run test` en la carpeta `frontend`.
 - Ejecutar `python -m pytest` para validar el motor de nómina.
 
+## Pruebas nuevas recomendadas
+- Añadir pruebas de integración que cubran filtros: `GET /api/nominas?periodo=...` y `GET /api/novedades?empleado_id=...`.
+- Añadir tests de auditoría: POST `api/auditoria/` (RH_ADMIN) y GET `api/auditoria/` para verificar trazabilidad.
+
 ## Comandos Recomendados
 ### Backend
 ```cmd

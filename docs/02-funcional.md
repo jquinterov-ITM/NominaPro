@@ -9,12 +9,12 @@ CRUD. Campos: nombre, documento (único), salario_base, tipo_salario ('ORDINARIO
 
 ### Novedades
 - POST/DELETE/GET por `novedad_id` y listado general. El endpoint `POST /api/novedades/` implementa un comportamiento *upsert*: si ya existe una novedad para `(empleado_id, periodo)` se actualiza, de lo contrario se crea.
-- Nota: actualmente no existe un endpoint público dedicado que devuelva novedades filtradas por `empleado_id` y/o `periodo` (aunque el repositorio interno dispone de funciones para obtenerlas). Se recomienda añadir `GET /api/novedades?empleado_id=...&periodo=...` si se requiere filtrado desde cliente.
+- Nota: `GET /api/novedades/` soporta filtros por `?empleado_id=` y `?periodo=` si se necesita acotar los resultados desde el cliente.
 
 ### Nóminas
 Liquidar período: genera nóminas por empleado activo usando las novedades persistidas. `POST /api/nominas/liquidar` realiza la orquestación y persistencia.
 
-- Nota: `GET /api/nominas/` devuelve el historial completo. Actualmente no existe un filtro por `periodo` expuesto en la API (p. ej. `GET /api/nominas?periodo=YYYY-MM`). Recomendación: añadir soporte de filtrado por `periodo` si se necesita consulta directa desde frontend.
+- Nota: `GET /api/nominas/` devuelve el historial; la API ahora soporta `GET /api/nominas?periodo=YYYY-MM` para filtrar por período.
 
 ## Reglas de Negocio
 Estas reglas se calculan dinámicamente basándose en la tabla `parametros_legales` para cada vigencia.
@@ -37,8 +37,8 @@ flowchart LR
 ```
 
 ## Límites Actuales/Roadmap
-- Autenticación: existe soporte JWT con usuario demo (`settings.DEMO_USERNAME`/`DEMO_PASSWORD`) y validación de roles (`RH_ADMIN`, `PAYROLL_USER`). Actualiza la doc si cambian las credenciales demo.
-- Cálculo simplificado.
-Próximo: Auditoría cambios, export PDF.
+ - Autenticación: existe soporte JWT con usuario demo (`settings.DEMO_USERNAME`/`DEMO_PASSWORD`) y validación de roles (`RH_ADMIN`, `PAYROLL_USER`). Auditoría y endpoints relacionados están protegidos por `RH_ADMIN`.
+ - Cálculo simplificado.
+ Próximo: ampliar campos de Auditoría es opcional (p.ej. `valor_anterior`/`valor_nuevo`) — hoy el esquema usa `detalle`.
 
 Alineado con código actual: endpoints CRUD + liquidación básica.

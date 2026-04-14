@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from ..core.auth import require_roles
@@ -14,9 +14,13 @@ router = APIRouter(prefix="/nominas", tags=["nominas"])
 
 
 @router.get("/", response_model=List[NominaResponse])
-def listar_nominas(db: Session = Depends(get_db)):
-    """Obtiene todo el historial de nóminas procesadas"""
-    return db.query(Nomina).all()
+def listar_nominas(
+    periodo: str | None = Query(None, description="Filtra por periodo YYYY-MM"),
+    db: Session = Depends(get_db),
+):
+    """Obtiene el historial de nóminas procesadas, opcionalmente filtrado por periodo."""
+    repo = NominaRepository(db)
+    return repo.list_nominas(periodo=periodo)
 
 
 @router.get("/{nomina_id}", response_model=NominaResponse)

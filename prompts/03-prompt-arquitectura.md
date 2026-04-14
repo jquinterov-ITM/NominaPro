@@ -89,9 +89,9 @@ NominaPro/
 
 | Módulo     | Frontend (Vue) | Backend (FastAPI `/api`) |
 |------------|-----------------|---------------------------|
-| Empleados  | Gestión de empleados | `GET /empleados`, `POST /empleados` |
-| Novedades  | Registro por período | `GET /novedades?periodo=YYYY-MM`, `POST /novedades` |
-| Nóminas    | Generación y consulta mensual | `POST /nominas/generar`, `GET /nominas?periodo=YYYY-MM` |
+| Empleados  | Gestión de empleados | `GET /empleados`, `POST /empleados`, `PUT /empleados/{id}` |
+| Novedades  | Registro por período | `GET /novedades/`, `POST /novedades` (upsert) |
+| Nóminas    | Generación y consulta mensual | `POST /nominas/liquidar`, `GET /nominas/` |
 
 ### 6. Flujo Funcional Principal: Liquidación Mensual
 Incluye un diagrama Mermaid `sequenceDiagram` con:
@@ -107,7 +107,7 @@ Incluye un diagrama Mermaid `sequenceDiagram` con:
 	- separación estricta `api → service → repository`,
 	- validación centralizada con Pydantic,
 	- manejo de errores estandarizado,
-	- optimización PostgreSQL (pooling/transacciones/observabilidad),
+	- **Base de datos**: SQLite para desarrollo local (sin configuración extra); PostgreSQL para producción (pooling, transacciones y observabilidad via `psycopg[binary]`). El cambio entre motores se controla únicamente con la variable `DATABASE_URL`,
 	- estrategia de pruebas unitarias e integración.
 
 ## Formato de Salida
@@ -118,6 +118,6 @@ Incluye un diagrama Mermaid `sequenceDiagram` con:
 El sistema ha materializado la arquitectura definida empleando Vue 3 con Vite en el frontend y FastAPI en el backend. Toda validación estricta de payloads (Pydantic v2) se coordina a través de Axios, manejando adecuadamente los formatos numéricos y parseos de respuestas HTTP.
 
 ## Notas de alineación con el código
-- **Endpoints reales:** En el código actual los routers están bajo `/api` y los endpoints principales son `POST /api/empleados/`, `GET /api/empleados/`, `POST /api/novedades/` (upsert), `GET /api/novedades/`, `POST /api/nominas/liquidar`, `GET /api/nominas/` y `GET /api/nominas/{id}`.
-- **Filtros:** Aunque la tabla sugiere `GET /novedades?periodo` y `GET /nominas?periodo`, la implementación actual no expone filtros por `periodo` en los endpoints públicos; se sugiere implementar estos filtros si el frontend los requiere.
+- **Endpoints reales:** En el código actual los routers están bajo `/api` y los endpoints principales son `POST /api/empleados/`, `GET /api/empleados/`, `PUT /api/empleados/{id}`, `DELETE /api/empleados/{id}`, `POST /api/novedades/` (upsert), `GET /api/novedades/`, `POST /api/nominas/liquidar`, `GET /api/nominas/` y `GET /api/nominas/{id}`.
+- **Filtros:** Los endpoints `GET /novedades/` y `GET /nominas/` devuelven el historial completo sin filtros por `periodo`. Se sugiere implementar `?periodo=YYYY-MM` si el frontend lo requiere.
 - **Términos y modelos:** usar `tipo_salario` en documentación y UI (valores `ORDINARIO`/`INTEGRAL`).

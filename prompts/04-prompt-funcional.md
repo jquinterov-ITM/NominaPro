@@ -64,7 +64,7 @@ Genera un documento funcional en Markdown que incluya:
 #### 2.2 Gestión de Novedades
 - Registrar, listar y eliminar novedades; el endpoint `POST /api/novedades/` implementa *upsert* por `(empleado_id, periodo)` (crea o actualiza la novedad existente).
 - Variables soportadas: horas extra, ausencias en días, bonificación, descuento.
-- Nota: actualmente no hay un endpoint público que devuelva novedades filtradas por `empleado_id` y/o `periodo` — solo existe listado general y acceso por `novedad_id`.
+ - Nota: `GET /api/novedades/` ahora soporta filtros por `?empleado_id=` y `?periodo=` — usar estos filtros desde el frontend cuando aplique.
 
 #### 2.3 Liquidación de Nómina
 - Generación mensual para empleados activos.
@@ -73,7 +73,7 @@ Genera un documento funcional en Markdown que incluya:
 #### 2.3 Liquidación de Nómina
 - Generación mensual para empleados activos (`POST /api/nominas/liquidar`).
 - Cálculo de devengado, deducciones y neto (ver `services/nomina_service.py`).
-- Nota: `GET /api/nominas/` devuelve el historial completo; no existe por ahora `GET /api/nominas?periodo=YYYY-MM` — se sugiere implementar filtrado si el frontend requiere consultas por período.
+ - Nota: `GET /api/nominas/` devuelve el historial; ahora soporta `GET /api/nominas?periodo=YYYY-MM` para filtrar por período.
 
 ### 3. Reglas de Negocio
 - Valor hora base = `salario_base / 240`.

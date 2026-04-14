@@ -75,7 +75,7 @@ Genera un documento de seguridad en Markdown que incluya:
 | Logging                   | Registrar eventos sin datos sensibles                   |
 
 ### 5. Protección de Datos
-- Definir política mínima de respaldo para PostgreSQL (dump, retención y restauración).
+- Definir política mínima de respaldo de datos: copia del archivo `nominapro.db` en desarrollo local (SQLite); dump, retención y restauración en producción (PostgreSQL).
 - Evitar almacenar secretos en código fuente.
 - Uso de `.env` por entorno.
 - Cifrado en tránsito (HTTPS) obligatorio en producción.

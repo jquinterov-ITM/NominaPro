@@ -45,6 +45,7 @@ Este skill define el **paso a paso estándar** para que cualquier agente o desar
 - **Backend**: Python + FastAPI
 - **Persistencia**: SQLite local (`nominapro.db`) / PostgreSQL en escenarios productivos
 - **Módulos actuales**: parámetros, empleados, novedades, nóminas
+ - **Módulos actuales**: parámetros, empleados, novedades, nóminas, auditoria
 
 ## Estructura base esperada
 
@@ -134,7 +135,7 @@ Se considera tarea cerrada si:
 Cuando un agente reciba una tarea debe seguir este orden:
 
 1. Leer este `prompt-skill.md`.
-2. Revisar `prompts/prompts-agents.md`.
+2. Revisar `prompts/02-prompt-agents.md`.
 3. Identificar archivos impactados y planificar cambios.
 4. Ejecutar cambios por lotes pequeños.
 5. Verificar ejecución local y actualizar documentación.
@@ -151,7 +152,12 @@ Cuando un agente reciba una tarea debe seguir este orden:
 ```bash
 # Backend
 python -m venv .venv
+
+# Activar en Windows PowerShell:
 .venv\Scripts\Activate.ps1
+# Activar en macOS / Linux (bash/zsh):
+# source .venv/bin/activate
+
 pip install -r backend/requirements.txt
 uvicorn app.main:app --reload --app-dir backend
 
@@ -165,4 +171,7 @@ npm run dev
 - **Autenticación:** El backend ya expone autenticación JWT de prueba con usuario demo y roles (`RH_ADMIN`, `PAYROLL_USER`). Actualiza credenciales demo si se cambian en `core/config.py`.
 - **Novedades:** `POST /api/novedades/` realiza *upsert* por `(empleado_id, periodo)`; no existe endpoint público filtrado por `empleado_id`/`periodo` (solo listado general y acceso por `novedad_id`).
 - **Nóminas:** La generación se realiza con `POST /api/nominas/liquidar`; `GET /api/nominas/` devuelve todo y `GET /api/nominas/{id}` existe, pero no hay filtro por `periodo` en la API actual.
+ - **Novedades:** `POST /api/novedades/` realiza *upsert* por `(empleado_id, periodo)`; `GET /api/novedades/` ahora soporta filtros por `?empleado_id` y `?periodo`.
+ - **Nóminas:** La generación se realiza con `POST /api/nominas/liquidar`; `GET /api/nominas/` devuelve historial y soporta filtro `?periodo=YYYY-MM`.
+ - **Auditoría:** Se añadió `POST /api/auditoria/` y `GET /api/auditoria/` protegidos por `RH_ADMIN` para trazabilidad administrativa.
 - **Términos:** Usar `tipo_salario` (valores `ORDINARIO`/`INTEGRAL`) en lugar de "tipo de contrato" para coherencia con modelos y esquemas.

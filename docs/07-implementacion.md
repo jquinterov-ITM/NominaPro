@@ -109,9 +109,10 @@
 
 
 
- ## Verificacion de Arranque
- - API Docs (Swagger): [http://127.0.0.1:9000/docs](http://127.0.0.1:9000/docs)
- - Frontend: [http://localhost:5173](http://localhost:5173)
+## Verificacion de Arranque
+- Health check: `GET /health` — devuelve `200 OK` con `{"status": "ok"}` cuando la API está operativa.
+- API Docs (Swagger): [http://127.0.0.1:9000/docs](http://127.0.0.1:9000/docs)
+- Frontend: [http://localhost:5173](http://localhost:5173)
 
  ## Flujo de Verificacion Manual (API)
  Para verificar el funcionamiento core desde la terminal (PowerShell):
@@ -194,6 +195,17 @@
  .venv\Scripts\python -m pytest --cov=backend.app.services.nomina_service --cov-report=term-missing --cov-fail-under=90
  ```
 
+### Asegurar `pytest` en el entorno
+Si `pytest` no se encuentra, activa el entorno virtual y ejecuta:
+
+```bash
+pip install pytest
+# o instalar todas las dependencias del backend (incluye pytest si está listado):
+pip install -r backend/requirements.txt
+```
+
+En PowerShell asegúrate de activar el venv con `\.venv\Scripts\Activate.ps1`.
+
  ### Frontend
  ```cmd
  cd frontend
@@ -209,10 +221,14 @@
  ## Cierre Formal
  - Alcance cubierto: backend, frontend, seguridad, calidad y documentación operativa.
  - Validación final: pruebas unitarias e integración ejecutadas con resultado satisfactorio.
- - Cobertura crítica: `backend.app.services.nomina_service` validado al 100%.
+ - Cobertura crítica: `backend.app.services.nomina_service` validada localmente en pruebas específicas; ejecutar la suite completa para verificar la cobertura global.
+ - Nota: ejecutar `pip install pytest` en el entorno virtual si `pytest` no está instalado.
  - Estado de entrega: proyecto listo para uso local y para seguimiento evolutivo.
 
  ## Notas de alineación con el código
  - **Token demo y autenticación:** El endpoint `POST /api/auth/token` devuelve JWT de prueba; úsalo en `Authorization: Bearer <token>` para rutas protegidas en los ejemplos de esta guía.
- - **Upsert de novedades:** `POST /api/novedades/` implementa upsert por `(empleado_id, periodo)`; los scripts de demostración y pruebas deben manejar la posibilidad de actualización en lugar de creación duplicada.
- - **Filtros no implementados:** Si necesitas `GET /api/nominas?periodo=YYYY-MM` o `GET /api/novedades?empleado_id=...`, deberás añadir esos filtros en los routers o filtrar en el cliente.
+ - **Upsert de novedades:** `POST /api/novedades/` implementa *upsert* por `(empleado_id, periodo)`; los scripts de demostración y pruebas deben manejar la posibilidad de actualización en lugar de creación duplicada.
+ - **Nóminas:** Orquestación en `POST /api/nominas/liquidar`; `GET /api/nominas/` devuelve el historial y ahora soporta filtro por periodo `?periodo=YYYY-MM`.
+ - **Modelos:** `ParametrosLegales`, `Empleado`, `Novedad`, `Nomina` están implementados en `backend/app/db/models.py` y los esquemas en `backend/app/schemas.py`.
+ - **Filtros implementados:** `GET /api/nominas?periodo=YYYY-MM` y `GET /api/novedades?empleado_id=&periodo=` ya están disponibles en los routers; preferir uso de filtros desde el frontend para eficiencia.
+ - **Auditoría:** Se añadieron endpoints `POST /api/auditoria/` y `GET /api/auditoria/` para trazabilidad administrativa (acceso `RH_ADMIN`).

@@ -39,6 +39,13 @@ class NominaRepository:
             self.db.query(Nomina).filter(Nomina.periodo == periodo).first() is not None
         )
 
+    def list_nominas(self, periodo: str | None = None) -> List[Nomina]:
+        """Lista nóminas, opcionalmente filtrando por periodo (YYYY-MM)."""
+        q = self.db.query(Nomina)
+        if periodo:
+            q = q.filter(Nomina.periodo == periodo)
+        return q.all()
+
     def persist_nominas(self, nominas_base: List[object]) -> List[Nomina]:
         """Persiste una lista de objetos pydantic (NominaBase) como registros Nomina."""
         nominas = []

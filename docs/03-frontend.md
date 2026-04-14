@@ -40,4 +40,6 @@ Definir la estructura y criterios de implementación de la SPA en Vue para opera
 - **Autenticación:** El backend ya devuelve JWT demo y roles (`RH_ADMIN`, `PAYROLL_USER`); el frontend debe obtener y almacenar el token para llamadas protegidas.
 - **Novedades y Upsert:** `POST /api/novedades/` implementa *upsert* por `(empleado_id, periodo)` — al crear novedades desde la UI, la interfaz debe manejar la actualización implícita.
 - **Filtros de consulta:** Actualmente `GET /api/nominas/` devuelve todo; no existe `GET /api/nominas?periodo=...` — si la UI necesita filtrar por período, se debe añadir soporte en el backend o filtrar en cliente (menos óptimo).
+ - **Filtros de consulta:** `GET /api/nominas/` soporta `?periodo=YYYY-MM` y `GET /api/novedades/` soporta `?empleado_id=` y `?periodo=`. Usar estos filtros desde la UI para reducir tráfico y carga.
 - **Términos:** usar `tipo_salario` en formularios y validaciones (valores `ORDINARIO`/`INTEGRAL`).
+ - **Auditoría:** operaciones administrativas (crear/actualizar empleado, eliminar nómina) pueden registrar eventos de auditoría en el backend; la UI no debe exponer esos datos sin autorización (`RH_ADMIN`).

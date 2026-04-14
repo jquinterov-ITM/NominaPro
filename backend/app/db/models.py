@@ -84,6 +84,8 @@ class Auditoria(Base):
     id = Column(Integer, primary_key=True, index=True)
     usuario_id = Column(Integer, nullable=False)  # ID del admin (Fase 2 de JWT)
     accion = Column(String, nullable=False)  # Ej: 'CREAR_EMPLEADO', 'EDITAR_SALARIO'
+    detalle = Column(Text, nullable=True)
+    fecha = Column(DateTime(timezone=True), server_default=func.now())
 
 
 class TipoNovedad(str, enum.Enum):

@@ -75,4 +75,10 @@ Genera un documento en Markdown que incluya:
 - **Autenticación:** El backend ya utiliza JWT (ver `backend/app/core/auth.py`); el frontend debe manejar tokens y roles (`RH_ADMIN`, `PAYROLL_USER`).
 - **Endpoints:** El endpoint para liquidar es `POST /api/nominas/liquidar`; `GET /api/nominas/` devuelve historial completo y `GET /api/nominas/{id}` existe. No hay `GET /api/nominas?periodo=...` implementado actualmente.
 - **Novedades:** `POST /api/novedades/` hace upsert por `(empleado_id, periodo)`; no hay endpoint público para listar por `empleado_id` y/o `periodo`.
+ - **Endpoints:** El endpoint para liquidar es `POST /api/nominas/liquidar`; `GET /api/nominas/` devuelve historial y `GET /api/nominas/{id}` existe. La API soporta ahora `GET /api/nominas?periodo=YYYY-MM` para filtrar por período.
+ - **Novedades:** `POST /api/novedades/` hace upsert por `(empleado_id, periodo)`; `GET /api/novedades/` soporta filtros `?empleado_id=` y `?periodo=` para consultas acotadas.
 - **Términos sincronizados:** usar `tipo_salario` en formularios y validaciones del frontend.
+ - **Términos sincronizados:** usar `tipo_salario` en formularios y validaciones del frontend.
+
+## Pruebas Frontend existentes
+- El frontend usa `vitest` (ver `frontend/package.json`) y contiene pruebas de componentes en `frontend/src/__tests__/` (Ej.: `EmpleadosView.spec.js`, `HomeView.spec.js`). Añadir cobertura e integración E2E según roadmap.

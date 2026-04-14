@@ -12,9 +12,12 @@ Describir la arquitectura, rutas y aspectos operativos del backend (FastAPI) par
 - `backend/app/schemas.py` — Pydantic para validación y serialización.
 
 ## Endpoints principales (prefijo `/api`)
+
+- `GET /health` — endpoint de verificación de salud (no requiere prefijo `/api`). Retorna `200 OK` con `{"status": "ok"}` cuando la API está operativa.
 - `POST /api/empleados/` — crear empleado (valida unicidad `documento`, valida integral >= 13 SMMLV según `ParametrosLegales`).
 - `GET /api/empleados/` — listar empleados.
 - `GET /api/empleados/{id}` — obtener empleado.
+- `PUT /api/empleados/{id}` — actualizar empleado (mismas validaciones que creación: unicidad de documento, salario integral >= 13 SMMLV).
 - `DELETE /api/empleados/{id}` — eliminar empleado y cascada lógica sobre novedades/nominas.
 
 - `GET /api/novedades/` — listar todas las novedades.
@@ -26,6 +29,9 @@ Describir la arquitectura, rutas y aspectos operativos del backend (FastAPI) par
 - `GET /api/nominas/{id}` — obtener nómina.
 - `POST /api/nominas/liquidar` — orquesta el cálculo masivo de nóminas (usa `services.nomina_service` y `repositories` para persistencia).
 
+- `POST /api/auditoria/` — registra un evento de auditoría (restringido a `RH_ADMIN`).
+- `GET /api/auditoria/` — lista eventos recientes de auditoría (restringido a `RH_ADMIN`).
+
 ## Seguridad
 - Autenticación JWT integrada (endpoint `POST /api/auth/token` para token demo).
 - Dependencias `require_roles(...)` aplicadas en routers para `RH_ADMIN` y `PAYROLL_USER`.
@@ -36,6 +42,6 @@ Describir la arquitectura, rutas y aspectos operativos del backend (FastAPI) par
 - Unicidad por `(empleado_id, periodo)` para `novedades` y `nominas` (UniqueConstraint).
 
 ## Observaciones y recomendaciones
-- Falta exponer filtros `GET /api/nominas?periodo=...` y `GET /api/novedades?empleado_id=...`; considerar añadirlos para eficiencia del frontend.
-- Añadir tabla `Auditoria` completa y endpoints de auditoría en próximas iteraciones.
+- Filtros expuestos: `GET /api/nominas?periodo=YYYY-MM` y `GET /api/novedades?empleado_id=&periodo=` implementados para consultas más eficientes desde el frontend.
+- Auditoría: endpoints `POST /api/auditoria/` y `GET /api/auditoria/` implementados (acceso restringido a `RH_ADMIN`). Considerar ampliar campos de `Auditoria` en siguientes iteraciones (valor_anterior/valor_nuevo).
 - Mantener pruebas de integración que usen tokens demo y limpien registros entre casos para evitar conflictos por unicidad.

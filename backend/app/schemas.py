@@ -1,5 +1,6 @@
 from decimal import Decimal
 from typing import Optional
+from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -120,3 +121,19 @@ class NominaResponse(NominaBase):
 
 class NominaLiquidar(BaseModel):
     periodo: str = Field(..., description="Mes a liquidar en formato YYYY-MM")
+
+
+class AuditoriaBase(BaseModel):
+    usuario_id: int = Field(..., description="ID del usuario que ejecuta la acción")
+    accion: str = Field(..., description="Acción registrada, p.ej. 'CREAR_EMPLEADO'")
+    detalle: Optional[str] = Field(None, description="Detalle libre o JSON con contexto")
+
+
+class AuditoriaCreate(AuditoriaBase):
+    pass
+
+
+class AuditoriaResponse(AuditoriaBase):
+    id: int
+    fecha: Optional[datetime]
+    model_config = ConfigDict(from_attributes=True)

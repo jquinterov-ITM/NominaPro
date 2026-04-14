@@ -54,6 +54,11 @@
 - Los errores de validación y autorización no exponen detalles internos.
 - CORS depende de la configuración del entorno.
 
+## Auditoría y Trazabilidad
+- Se añadió la tabla `auditoria` y los endpoints `POST /api/auditoria/` y `GET /api/auditoria/` para registrar eventos administrativos.
+- Acceso restringido: solamente roles `RH_ADMIN` pueden invocar estos endpoints.
+- Recomendación: registrar `usuario_id`, `accion`, `detalle`, `fecha` y considerar en próximas versiones `valor_anterior` y `valor_nuevo` para cambios críticos (salarios, estado de nómina).
+
 ## Notas de alineación con el código
 - **JWT en el repo:** El código implementa JWT demo en `backend/app/core/auth.py` y las rutas usan la dependencia `require_roles` para control de acceso.
 - **Pruebas:** Para probar endpoints protegidos, obtener token en `POST /api/auth/token` usando credenciales demo según `config`.

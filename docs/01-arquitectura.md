@@ -40,6 +40,14 @@ SPA para empleados, novedades, nóminas. Axios a /api.
 ### Backend (FastAPI)
 main.py arranque, routers /api/*, servicios de nómina.
 
+### Health Check
+- `GET /health` — endpoint de verificación de salud de la API. Retorna `200 OK` con el payload `{"status": "ok"}` cuando la aplicación está operativa.
+
+### Auditoría y filtros
+- `POST /api/auditoria/` — registrar eventos administrativos (restringido a `RH_ADMIN`).
+- `GET /api/auditoria/` — listar eventos de auditoría (restringido a `RH_ADMIN`).
+- Filtros en APIs: `GET /api/novedades/` soporta `?empleado_id=` y `?periodo=`; `GET /api/nominas/` soporta `?periodo=YYYY-MM` para consultas más eficientes desde la UI.
+
 ### DB (SQLite local)
 Modelos: Empleado, Novedad, Nomina.
 
@@ -70,6 +78,6 @@ sequenceDiagram
 Estado actual: MVP operativo alineado.
 
 ## Notas de alineación con el código
-- **Endpoints reales:** Los routers están expuestos bajo `/api` y los endpoints actuales incluyen `POST /api/empleados/`, `GET /api/empleados/`, `POST /api/novedades/` (comportamiento *upsert*), `GET /api/novedades/`, `POST /api/nominas/liquidar`, `GET /api/nominas/` y `GET /api/nominas/{id}`.
-- **Filtros sugeridos:** Aunque la arquitectura sugiere filtros por `periodo` o `empleado_id`, la implementación actual no expone `GET /api/nominas?periodo=...` ni `GET /api/novedades?empleado_id=...` — se pueden añadir si el frontend lo requiere.
+- **Endpoints reales:** Los routers están expuestos bajo `/api` y los endpoints actuales incluyen `POST /api/empleados/`, `GET /api/empleados/`, `PUT /api/empleados/{id}`, `DELETE /api/empleados/{id}`, `POST /api/novedades/` (comportamiento *upsert*), `GET /api/novedades/`, `POST /api/nominas/liquidar`, `GET /api/nominas/` y `GET /api/nominas/{id}`.
+- **Filtros:** La implementación ahora soporta `GET /api/nominas?periodo=...` y `GET /api/novedades?empleado_id=&periodo=`; se recomienda al frontend usar estos filtros para evitar transferencias innecesarias.
 - **Términos:** usar `tipo_salario` (`ORDINARIO`/`INTEGRAL`) en documentación y en la UI para mantener coherencia con `models.py` y `schemas.py`.

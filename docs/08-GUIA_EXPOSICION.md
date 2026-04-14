@@ -12,6 +12,7 @@ Este documento contiene notas y puntos clave para la presentación del proyecto 
 2. Iniciar el backend y mostrar Swagger en `/docs`.
 3. Iniciar el frontend y abrir la vista de nóminas.
 4. Crear empleado demo y mostrar flujo de liquidación.
+4.1 (Opcional) Mostrar auditoría: crear un empleado o novedad y luego consultar `GET /api/auditoria/` con token `RH_ADMIN` para demostrar trazabilidad.
 5. Mostrar pruebas unitarias y resultados de `pytest`.
 
 ## Roles y seguridad
@@ -36,3 +37,4 @@ Este documento contiene notas y puntos clave para la presentación del proyecto 
 - **Login demo:** El token demo se obtiene en `POST /api/auth/token` (credenciales demo según configuración); úsalo para las demos que requieren rutas protegidas.
 - **Novedades:** `POST /api/novedades/` hace upsert por `(empleado_id, periodo)` — al preparar la demo, limpiar datos o usar periodos distintos para evitar conflictos de unicidad.
 - **Endpoints de nómina:** Usar `POST /api/nominas/liquidar` para la demo; `GET /api/nominas/` lista historial pero no filtra por `periodo` a menos que se añada soporte.
+ - **Endpoints de nómina:** Usar `POST /api/nominas/liquidar` para la demo; `GET /api/nominas/` soporta `?periodo=YYYY-MM` para filtrar resultados durante la exposición.

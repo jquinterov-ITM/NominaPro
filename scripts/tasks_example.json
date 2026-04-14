@@ -1,0 +1,17 @@
+[
+  {
+    "title": "Actualizar dependencias",
+    "summary": "Actualizar requirements y lockfile",
+    "description": "Se actualizarán paquetes listados en requirements.txt y se ejecutarán tests."
+  },
+  {
+    "title": "Agregar endpoint empleados",
+    "summary": "Crear router y service",
+    "description": "Agregar POST/GET para empleados, actualizar modelos y docs."
+  },
+  {
+    "title": "Refactor autenticación",
+    "summary": "Extraer lógica a service auth",
+    "description": "Separar middleware y añadir logging de auditoría."
+  }
+]

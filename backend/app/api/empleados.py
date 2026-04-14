@@ -83,6 +83,65 @@ def obtener_empleado(empleado_id: int, db: Session = Depends(get_db)):
     return empleado
 
 
+@router.put("/{empleado_id}", response_model=schemas.EmpleadoResponse)
+def actualizar_empleado(
+    empleado_id: int,
+    empleado_in: schemas.EmpleadoCreate,
+    current_user: dict = Depends(require_roles("RH_ADMIN")),
+    db: Session = Depends(get_db),
+):
+    """
+    Actualiza los datos de un empleado existente.
+    Aplica las mismas validaciones de dominio que la creación.
+    """
+    empleado = (
+        db.query(models.Empleado).filter(models.Empleado.id == empleado_id).first()
+    )
+    if not empleado:
+        raise HTTPException(status_code=404, detail="Empleado no encontrado.")
+
+    # Validar que el documento no esté duplicado en otro empleado
+    duplicado = (
+        db.query(models.Empleado)
+        .filter(
+            models.Empleado.documento == empleado_in.documento,
+            models.Empleado.id != empleado_id,
+        )
+        .first()
+    )
+    if duplicado:
+        raise HTTPException(
+            status_code=400, detail="Ya existe otro empleado con este documento."
+        )
+
+    # Regla R01/R02: Validación Salario Integral >= 13 SMMLV
+    if empleado_in.tipo_salario == models.TipoSalario.INTEGRAL:
+        anio_actual = datetime.now().year
+        param_legal = (
+            db.query(models.ParametrosLegales)
+            .filter(models.ParametrosLegales.anio == anio_actual)
+            .first()
+        )
+        if not param_legal:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Faltan parámetros legales para el año {anio_actual}.",
+            )
+        minimo_integral = param_legal.smmlv * Decimal("13")
+        if empleado_in.salario_base < minimo_integral:
+            raise HTTPException(
+                status_code=400,
+                detail=f"REGLA R01: El salario integral no puede ser inferior a 13 SMMLV. Mínimo para {anio_actual}: ${minimo_integral:,.2f}.",
+            )
+
+    empleado.nombre = empleado_in.nombre
+    empleado.documento = empleado_in.documento
+    empleado.salario_base = empleado_in.salario_base
+    empleado.tipo_salario = empleado_in.tipo_salario
+    db.commit()
+    db.refresh(empleado)
+    return empleado
+
 @router.delete("/{empleado_id}", status_code=status.HTTP_200_OK)
 def eliminar_empleado(
     empleado_id: int,

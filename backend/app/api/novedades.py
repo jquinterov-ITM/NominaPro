@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from ..core.auth import require_roles
@@ -12,9 +12,18 @@ router = APIRouter(prefix="/novedades", tags=["novedades"])
 
 
 @router.get("/", response_model=List[NovedadResponse])
-def listar_novedades(db: Session = Depends(get_db)):
-    """Retorna todo el historial de novedades"""
-    return db.query(Novedad).all()
+def listar_novedades(
+    empleado_id: int | None = Query(None, description="Filtra por empleado_id"),
+    periodo: str | None = Query(None, description="Filtra por periodo YYYY-MM"),
+    db: Session = Depends(get_db),
+):
+    """Retorna historial de novedades, opcionalmente filtrado por empleado y/o periodo"""
+    q = db.query(Novedad)
+    if empleado_id is not None:
+        q = q.filter(Novedad.empleado_id == empleado_id)
+    if periodo:
+        q = q.filter(Novedad.periodo == periodo)
+    return q.all()
 
 
 @router.get("/{novedad_id}", response_model=NovedadResponse)

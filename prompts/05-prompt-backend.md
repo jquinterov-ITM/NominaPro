@@ -28,8 +28,10 @@ source .venv/bin/activate
 - **Base de datos**: SQLite (Desarrollo Local) / PostgreSQL con psycopg[binary] (Producción)
 - **Frontend**: Vue.js
 - **Módulos actuales**: empleados, novedades, nóminas
+ - **Módulos actuales**: empleados, novedades, nóminas, auditoria
 
 ## Objetivo
+Generar el archivo `/docs/05-backend.md` de **NominaPro**.
 Proponer e implementar mejoras del backend de **NominaPro** manteniendo su enfoque pedagógico, sin romper endpoints actuales y con cambios incrementales de bajo riesgo.
 
 ## Estado operativo actual
@@ -47,7 +49,7 @@ Actúa como backend engineer y entrega una propuesta técnica en Markdown que in
 
 ### 2. Objetivo de Refactor Incremental
 - Mantener compatibilidad de API actual:
-	- `GET/POST/DELETE /api/empleados`
+	- `GET/POST/PUT/DELETE /api/empleados`
 	- `GET/POST /api/novedades`
 	- `GET /api/nominas`
 	- `GET /api/nominas/{id}`
@@ -83,7 +85,8 @@ backend/
 - **Modelado de BD (SQLAlchemy agnóstico a SQLite/PostgreSQL):** 
   - Crear modelo `ParametrosLegales` con campos para: `anio`, `smmlv`, `auxilio_transporte`, `horas_mes`, `dias_mes`, `porcentaje_hora_extra`, `factor_salario_integral`, `tope_ibc_smmlv`, `porcentaje_salud_empleado`, `porcentaje_pension_empleado`, `porcentaje_fsp`, `umbral_fsp_smmlv`, `umbral_transporte_smmlv`, y porcentajes de provisiones.
   - Actualizar modelo `Empleado` con `tipo_salario` (enum: 'ORDINARIO' o 'INTEGRAL').
-  - **Auditoría:** Crear modelo `Auditoria` (usuario_id, accion, valor_anterior, valor_nuevo, fecha) para registrar todo cambio de salario o novedades UGPP.
+	- **Auditoría:** Crear modelo `Auditoria` (usuario_id, accion, detalle, fecha) para registrar cambios administrativos y operativos. Endpoints `POST /api/auditoria/` y `GET /api/auditoria/` deben estar protegidos por rol `RH_ADMIN`.
+	- Nota: `valor_anterior` / `valor_nuevo` pueden añadirse en una futura versión si se requiere almacenar estados previos y nuevos de manera estructurada.
 - **Validación Salario:** Al crear empleado (`POST /api/empleados`), si es 'INTEGRAL', el salario base estrictamente **no puede ser menor a 13 SMMLV** (usando `ParametrosLegales`). Lanzar HTTP 400 si no cumple.
 - **Cálculo IBC y Aportes:** El IBC no puede ser inferior a 1 SMMLV ni superior a 25 SMMLV. Si es Integral, IBC pensión/salud = 70% del base. Calcular Salud (Emp 4%, Pat 8.5%), Pensión (Emp 4%, Pat 12%), Caja (Pat 4%).
 - **FSP y Transporte:** Auxilio de Transporte si el salario base es < 2 SMMLV (solo Ordinario). FSP si IBC Pensión >= 4 SMMLV (inicia en 1%).
@@ -113,4 +116,6 @@ backend/
 - **Autenticación:** JWT ya está implementado y utilizado en dependencias `require_roles` en routers (`backend/app/core/auth.py`).
 - **Novedades:** `POST /api/novedades/` realiza *upsert* por `(empleado_id, periodo)`; el repositorio (`NominaRepository`) sí posee helpers para obtener novedades por empleado+periodo, pero no hay endpoint público para ese filtrado.
 - **Nóminas:** Orquestación en `POST /api/nominas/liquidar`; `GET /api/nominas/` devuelve historial completo sin filtro `periodo` en la API actual.
+ - **Nóminas:** Orquestación en `POST /api/nominas/liquidar`; `GET /api/nominas/` devuelve historial y soporta filtro por `?periodo=YYYY-MM`.
+ - **Novedades:** `GET /api/novedades/` soporta filtros `?empleado_id=` y `?periodo=` para facilitar consultas del frontend.
 - **Modelos:** `ParametrosLegales`, `Empleado`, `Novedad`, `Nomina` están implementados en `backend/app/db/models.py` y los esquemas en `backend/app/schemas.py`.
