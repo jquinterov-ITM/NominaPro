@@ -66,8 +66,10 @@ sequenceDiagram
 | Nóminas | /api/nominas | Liquidar/listar |
 
 ## Evolución Pendiente
-- Services/repositories completos.
-- JWT/roles.
-- Tests 80% cobertura.
 
 Estado actual: MVP operativo alineado.
+
+## Notas de alineación con el código
+- **Endpoints reales:** Los routers están expuestos bajo `/api` y los endpoints actuales incluyen `POST /api/empleados/`, `GET /api/empleados/`, `POST /api/novedades/` (comportamiento *upsert*), `GET /api/novedades/`, `POST /api/nominas/liquidar`, `GET /api/nominas/` y `GET /api/nominas/{id}`.
+- **Filtros sugeridos:** Aunque la arquitectura sugiere filtros por `periodo` o `empleado_id`, la implementación actual no expone `GET /api/nominas?periodo=...` ni `GET /api/novedades?empleado_id=...` — se pueden añadir si el frontend lo requiere.
+- **Términos:** usar `tipo_salario` (`ORDINARIO`/`INTEGRAL`) en documentación y en la UI para mantener coherencia con `models.py` y `schemas.py`.

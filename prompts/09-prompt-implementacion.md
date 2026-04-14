@@ -1,5 +1,27 @@
 # Prompt: Documentación de Implementación – NominaPro
 
+## Compatibilidad multiplataforma
+
+Los pasos de instalación y arranque de este prompt están diseñados para funcionar en Windows (PowerShell/CMD) y macOS/Linux. Ejemplo mínimo:
+
+PowerShell:
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+CMD:
+```cmd
+python -m venv .venv
+.venv\Scripts\activate.bat
+```
+
+macOS / Linux:
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
 ## Contexto del Proyecto
 - **Nombre**: NominaPro
 - **Frontend**: Vue.js
@@ -8,7 +30,7 @@
 - **Infraestructura**: ejecución local (sin contenedores obligatorios)
 
 ## Objetivo
-Generar el archivo `/docs/implementacion.md` de **NominaPro**.
+Generar el archivo `/docs/07-implementacion.md` de **NominaPro**.
 
 ## Estado actual del punto 1
 - El frontend ya no debe depender de datos simulados.
@@ -100,3 +122,8 @@ Incluye ejemplos de requests/responses JSON para cada paso.
 - Integración de cors en main.py de FastAPI para comunicación al puerto de Vite (5173).
 - Sistema base operante: Empleados creados exitosamente salvaguardando inconsistencias de datos.
 - Cobertura de pruebas crítica validada al 100%.
+
+## Notas de alineación con el código
+- **Endpoints reales y pruebas:** usar `POST /api/nominas/liquidar` para generación; documentar tokens JWT de demo para pruebas automatizadas.
+- **Novedades:** `POST /api/novedades/` realiza upsert; los tests de integración deben crear/limpiar datos para evitar conflictos por unique constraints `(empleado_id, periodo)`.
+- **Filtros en API:** si la implementación del frontend necesita `GET /api/nominas?periodo=...` o `GET /api/novedades?empleado_id=...`, se deberán añadir esos filtros en los routers o implementar endpoints dedicados.

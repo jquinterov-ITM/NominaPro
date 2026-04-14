@@ -1,5 +1,27 @@
 # Prompt: Documentación de Calidad – NominaPro
 
+## Compatibilidad multiplataforma
+
+Los ejemplos de ejecución de tests y comandos de calidad son multiplataforma. Ejemplo mínimo para crear/activar `venv`:
+
+PowerShell:
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+CMD:
+```cmd
+python -m venv .venv
+.venv\Scripts\activate.bat
+```
+
+macOS / Linux:
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
 ## Contexto del Proyecto
 - **Nombre**: NominaPro
 - **Frontend**: Vue.js
@@ -8,7 +30,7 @@
 - **Infraestructura**: ejecución local simple
 
 ## Objetivo
-Generar el archivo `/docs/5. quality.md` de **NominaPro**.
+Generar el archivo `/docs/06-calidad.md` de **NominaPro**.
 
 ## Criterio operativo actual
 - No se aceptan fallbacks que creen datos en memoria cuando un endpoint falla.
@@ -77,3 +99,8 @@ Incluye comandos sugeridos (según herramientas elegidas), por ejemplo:
 
 ## Formato de Salida
 - Markdown con tablas, checklist y ejemplos de casos de prueba.
+
+## Notas de alineación con el código
+- **Tests existentes:** Hay tests unitarios en `tests/unit/test_nomina_service.py` que cubren `liquidar_todos_empleados`.
+- **Práctica requerida:** las pruebas de integración deben usar endpoints reales (`/api`) y una DB de pruebas; evitar simulaciones en memoria.
+- **Endpoints y validaciones:** documentar en los tests el comportamiento *upsert* de `POST /api/novedades/` y la ausencia de `GET /api/nominas?periodo` si se confía en esa funcionalidad.

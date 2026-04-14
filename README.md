@@ -108,33 +108,73 @@ Si el frontend sigue mostrando sesión de invitado, normalmente significa una de
 - El navegador conserva un token viejo; en ese caso cierra sesión o borra el almacenamiento local del sitio.
 
 
-## Arranque rapido
+## Arranque rápido (Multiplataforma)
+
+Estas instrucciones funcionan en Windows (PowerShell o CMD), macOS y Linux (bash/zsh).
 
 ### Backend
 
-```cmd
-.venv\\Scripts\\Activate.bat [si no aparece (.venv)]
-python -m pip install -r backend\requirements.txt
-python -m uvicorn app.main:app --host 127.0.0.1 --port 9000 --app-dir .
+1) Crear y activar un entorno virtual
+
+- Windows PowerShell:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
 ```
 
-Luego abre [http://127.0.0.1:9000/docs](http://127.0.0.1:9000/docs).
+- Windows CMD (si no usas PowerShell):
 
-Si quieres recarga automática, prueba agregar `--reload`, pero en Windows puede disparar `WinError 10013` en algunos equipos. Si pasa eso, arranca sin `--reload` como se muestra arriba.
+```cmd
+python -m venv .venv
+.venv\Scripts\activate.bat
+```
+
+- macOS / Linux (bash/zsh):
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
+2) Instalar dependencias
+
+```bash
+pip install -r backend/requirements.txt
+```
+
+3) Ejecutar la API (desde la raíz del proyecto o dentro de `backend`)
+
+```bash
+cd backend
+python -m uvicorn app.main:app --host 127.0.0.1 --port 9000
+```
+
+- Opción con recarga para desarrollo: agregar `--reload` (útil en macOS/Linux). En Windows algunas máquinas muestran `WinError 10013` con `--reload`; si ocurre, arranca sin `--reload`.
+
+4) Verificar que la API esté disponible
+
+Abre: http://127.0.0.1:9000/docs
 
 ### Frontend
 
-Abrir nueva terminal.
-Si la terminal ya muestra `(.venv)`, no necesitas volver a ejecutar `.venv\\Scripts\\Activate.bat`. Esa línea solo se usa en una terminal nueva.
+Abrir nueva terminal y desde la carpeta `frontend`:
 
-
-```cmd
+```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-Luego abre [http://localhost:5173](http://localhost:5173/).
+Luego abre: http://localhost:5173
+
+Si el frontend no encuentra el backend, revisa la variable `VITE_API_URL` o usa el proxy local de Vite.
+
+### Scripts de demostración
+
+En la raíz del proyecto hay dos scripts para demostraciones:
+- `demo_api.ps1` — PowerShell (Windows).
+- `demo_api.sh` — Bash (macOS/Linux). Hazlo ejecutable con `chmod +x demo_api.sh` y ejecútalo con `./demo_api.sh`.
 
 La portada incluye un acceso de demo para obtener el token antes de usar rutas de escritura.
 

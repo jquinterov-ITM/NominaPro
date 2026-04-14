@@ -1,5 +1,27 @@
 # Prompt: Documentación Funcional – NominaPro
 
+## Compatibilidad multiplataforma
+
+Este prompt incluye ejemplos que funcionan en Windows (PowerShell/CMD), macOS y Linux. Crear/activar `venv`:
+
+PowerShell:
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+CMD:
+```cmd
+python -m venv .venv
+.venv\Scripts\activate.bat
+```
+
+macOS / Linux:
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
 ## Contexto del Proyecto
 - **Nombre**: NominaPro
 - **Frontend**: Vue.js
@@ -8,7 +30,7 @@
 - **Enfoque**: sistema educativo de nómina, simple e incremental
 
 ## Objetivo
-Generar el archivo `/docs/2. funcional.md` de **NominaPro**.
+Generar el archivo `/docs/02-funcional.md` de **NominaPro**.
 
 ## Estado actual que debe reflejarse
 - El usuario crea, consulta y elimina empleados y novedades con llamadas reales al backend.
@@ -30,16 +52,28 @@ Genera un documento funcional en Markdown que incluya:
 - Crear, listar y eliminar empleados.
 - Campos mínimos: nombre, documento, salario base, tipo de contrato.
 - Restricción de unicidad por documento.
+#### 2.1 Gestión de Empleados
+- Crear, listar y eliminar empleados.
+- Campos mínimos: `nombre`, `documento`, `salario_base`, `tipo_salario` (usar este término; valores: `ORDINARIO` | `INTEGRAL`).
+- Restricción de unicidad por `documento`.
 
 #### 2.2 Gestión de Novedades
 - Registrar, listar y eliminar novedades por empleado y período (`YYYY-MM`).
 - Variables soportadas: horas extra, ausencias en días, bonificación, descuento extra.
 - Upsert por `(empleado_id, periodo)`.
+#### 2.2 Gestión de Novedades
+- Registrar, listar y eliminar novedades; el endpoint `POST /api/novedades/` implementa *upsert* por `(empleado_id, periodo)` (crea o actualiza la novedad existente).
+- Variables soportadas: horas extra, ausencias en días, bonificación, descuento.
+- Nota: actualmente no hay un endpoint público que devuelva novedades filtradas por `empleado_id` y/o `periodo` — solo existe listado general y acceso por `novedad_id`.
 
 #### 2.3 Liquidación de Nómina
 - Generación mensual para empleados activos.
 - Cálculo de devengado, deducciones y neto.
 - Consulta de nóminas por período.
+#### 2.3 Liquidación de Nómina
+- Generación mensual para empleados activos (`POST /api/nominas/liquidar`).
+- Cálculo de devengado, deducciones y neto (ver `services/nomina_service.py`).
+- Nota: `GET /api/nominas/` devuelve el historial completo; no existe por ahora `GET /api/nominas?periodo=YYYY-MM` — se sugiere implementar filtrado si el frontend requiere consultas por período.
 
 ### 3. Reglas de Negocio
 - Valor hora base = `salario_base / 240`.

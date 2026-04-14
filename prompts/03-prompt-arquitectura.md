@@ -1,5 +1,30 @@
 # Prompt: Documentación de Arquitectura – NominaPro
 
+## Compatibilidad multiplataforma
+
+Los comandos y ejemplos de este prompt son multiplataforma (Windows PowerShell/CMD y macOS/Linux). Ejemplo mínimo para crear/activar `venv`:
+
+PowerShell:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+CMD:
+
+```cmd
+python -m venv .venv
+.venv\Scripts\activate.bat
+```
+
+macOS / Linux:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
 ## Contexto del Proyecto
 - **Nombre**: NominaPro
 - **Frontend**: Vue.js
@@ -8,7 +33,7 @@
 - **Infraestructura**: ejecución local simple y después en Kubernetes
 
 ## Objetivo
-Generar el archivo `/docs/1. arquitectura.md` de **NominaPro**.
+Generar el archivo `/docs/01-arquitectura.md` de **NominaPro**.
 
 ## Instrucciones
 
@@ -55,7 +80,6 @@ NominaPro/
 - Tablas principales: `empleados`, `novedades`, `nominas`.
 - Restricciones de unicidad por documento y por `(empleado_id, periodo)`.
 
-
 ### 4. Comunicación entre Componentes
 - Protocolo HTTP/REST + JSON.
 - CORS habilitado para el frontend Vue por entorno.
@@ -73,7 +97,6 @@ NominaPro/
 Incluye un diagrama Mermaid `sequenceDiagram` con:
 - Registro/actualización de novedades.
 - Solicitud de generación mensual.
-- Consulta de empleados activos.
 - Cálculo por empleado: Lectura de parámetros (SMMLV, topes), procesamiento Ordinario/Integral (factor 70/30), generación de aportes, FSP.
 - Persistencia de resultados.
 - Respuesta consolidada para frontend.
@@ -93,3 +116,8 @@ Incluye un diagrama Mermaid `sequenceDiagram` con:
 
 ## Actualización (Día Actual)
 El sistema ha materializado la arquitectura definida empleando Vue 3 con Vite en el frontend y FastAPI en el backend. Toda validación estricta de payloads (Pydantic v2) se coordina a través de Axios, manejando adecuadamente los formatos numéricos y parseos de respuestas HTTP.
+
+## Notas de alineación con el código
+- **Endpoints reales:** En el código actual los routers están bajo `/api` y los endpoints principales son `POST /api/empleados/`, `GET /api/empleados/`, `POST /api/novedades/` (upsert), `GET /api/novedades/`, `POST /api/nominas/liquidar`, `GET /api/nominas/` y `GET /api/nominas/{id}`.
+- **Filtros:** Aunque la tabla sugiere `GET /novedades?periodo` y `GET /nominas?periodo`, la implementación actual no expone filtros por `periodo` en los endpoints públicos; se sugiere implementar estos filtros si el frontend los requiere.
+- **Términos y modelos:** usar `tipo_salario` en documentación y UI (valores `ORDINARIO`/`INTEGRAL`).

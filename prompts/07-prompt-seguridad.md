@@ -1,14 +1,36 @@
 # Prompt: Documentación de Seguridad – NominaPro
 
+## Compatibilidad multiplataforma
+
+Los comandos de ejemplo y procedimientos de este prompt son válidos en Windows (PowerShell/CMD), macOS y Linux. Ejemplo mínimo para `venv`:
+
+PowerShell:
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+CMD:
+```cmd
+python -m venv .venv
+.venv\Scripts\activate.bat
+```
+
+macOS / Linux:
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
 ## Contexto del Proyecto
 - **Nombre**: NominaPro
 - **Frontend**: Vue.js
 - **Backend**: Python + FastAPI
 - **Base de datos**: SQLite (Desarrollo Local) / PostgreSQL con psycopg[binary] (Producción)
-- **Estado actual**: sin autenticación/autorización, controles base de API
+- **Estado actual**: autenticación JWT de prueba integrada y controles base de API
 
 ## Objetivo
-Generar el archivo `/docs/4. seguridad.md` de **NominaPro** con enfoque incremental y realista para la versión actual.
+Generar el archivo `/docs/04-seguridad.md` de **NominaPro** con enfoque incremental y realista para la versión actual.
 
 ## Instrucciones
 
@@ -65,3 +87,8 @@ Genera un documento de seguridad en Markdown que incluya:
 
 ## Formato de Salida
 - Markdown con tablas, checklist y roadmap por fases.
+
+## Notas de alineación con el código
+- **JWT presente:** El código ya implementa JWT demo y validación por roles (`require_roles`) en routers; actualizar el prompt para trabajar con tokens de prueba en desarrollo.
+- **EndPoints críticos:** `POST /api/empleados/` (creación con validaciones), `POST /api/novedades/` (upsert), `POST /api/nominas/liquidar`.
+- **Recomendación:** Probar con credenciales demo definidas en `backend/app/core/config.py` y documentar pasos de obtención de token en `docs/07-implementacion.md`.

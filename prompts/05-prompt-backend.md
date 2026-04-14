@@ -1,5 +1,27 @@
 # Prompt: Backend – Python/FastAPI con Buenas Prácticas (NominaPro)
 
+## Compatibilidad multiplataforma
+
+Los ejemplos de instalación y arranque están escritos para funcionar en Windows (PowerShell/CMD) y en macOS/Linux. Ejemplo mínimo de `venv`:
+
+PowerShell:
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+CMD:
+```cmd
+python -m venv .venv
+.venv\Scripts\activate.bat
+```
+
+macOS / Linux:
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
 ## Contexto del Proyecto
 - **Nombre**: NominaPro
 - **Backend**: Python + FastAPI
@@ -86,3 +108,9 @@ backend/
 
 ## Formato de Salida
 - Markdown estructurado con secciones, tablas y checklist de tareas accionables.
+
+## Notas de alineación con el código
+- **Autenticación:** JWT ya está implementado y utilizado en dependencias `require_roles` en routers (`backend/app/core/auth.py`).
+- **Novedades:** `POST /api/novedades/` realiza *upsert* por `(empleado_id, periodo)`; el repositorio (`NominaRepository`) sí posee helpers para obtener novedades por empleado+periodo, pero no hay endpoint público para ese filtrado.
+- **Nóminas:** Orquestación en `POST /api/nominas/liquidar`; `GET /api/nominas/` devuelve historial completo sin filtro `periodo` en la API actual.
+- **Modelos:** `ParametrosLegales`, `Empleado`, `Novedad`, `Nomina` están implementados en `backend/app/db/models.py` y los esquemas en `backend/app/schemas.py`.

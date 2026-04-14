@@ -53,3 +53,8 @@
 - Los endpoints de creación y eliminación exigen rol autorizado.
 - Los errores de validación y autorización no exponen detalles internos.
 - CORS depende de la configuración del entorno.
+
+## Notas de alineación con el código
+- **JWT en el repo:** El código implementa JWT demo en `backend/app/core/auth.py` y las rutas usan la dependencia `require_roles` para control de acceso.
+- **Pruebas:** Para probar endpoints protegidos, obtener token en `POST /api/auth/token` usando credenciales demo según `config`.
+- **Upsert y unicidad:** `POST /api/novedades/` realiza upsert por `(empleado_id, periodo)`; las pruebas de seguridad deben incluir escenarios de intento de duplicación y validación de permisos.

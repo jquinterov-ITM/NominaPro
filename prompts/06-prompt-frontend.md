@@ -1,5 +1,27 @@
 # Prompt: Frontend – Vue.js para NominaPro
 
+## Compatibilidad multiplataforma
+
+Los comandos de arranque y pruebas son multiplataforma. Crear/activar `venv`:
+
+PowerShell:
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+CMD:
+```cmd
+python -m venv .venv
+.venv\Scripts\activate.bat
+```
+
+macOS / Linux:
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
 ## Contexto del Proyecto
 - **Nombre**: NominaPro
 - **Frontend**: Vue.js
@@ -8,7 +30,7 @@
 - **Enfoque**: sistema educativo de nómina con evolución incremental hacia cumplimiento 2026
 
 ## Objetivo
-Generar el archivo `/docs/3. frontend.md` de **NominaPro** con lineamientos de implementación y calidad para la interfaz de usuario.
+Generar el archivo `/docs/03-frontend.md` de **NominaPro** con lineamientos de implementación y calidad para la interfaz de usuario.
 
 ## Instrucciones
 
@@ -48,3 +70,9 @@ Genera un documento en Markdown que incluya:
 
 ## Formato de Salida
 - Markdown estructurado con secciones, tablas y checklist de implementación.
+
+## Notas de alineación con el código
+- **Autenticación:** El backend ya utiliza JWT (ver `backend/app/core/auth.py`); el frontend debe manejar tokens y roles (`RH_ADMIN`, `PAYROLL_USER`).
+- **Endpoints:** El endpoint para liquidar es `POST /api/nominas/liquidar`; `GET /api/nominas/` devuelve historial completo y `GET /api/nominas/{id}` existe. No hay `GET /api/nominas?periodo=...` implementado actualmente.
+- **Novedades:** `POST /api/novedades/` hace upsert por `(empleado_id, periodo)`; no hay endpoint público para listar por `empleado_id` y/o `periodo`.
+- **Términos sincronizados:** usar `tipo_salario` en formularios y validaciones del frontend.

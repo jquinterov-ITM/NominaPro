@@ -4,6 +4,29 @@ description: workflows y guías de agentes para el proyecto NominaPro
 
 # Workflows de NominaPro para Agentes
 
+Compatibilidad multiplataforma: los pasos de arranque funcionan en Windows (PowerShell/CMD), macOS y Linux (bash/zsh). Ejemplo mínimo para crear/activar `venv`:
+
+- PowerShell:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+- CMD:
+
+```cmd
+python -m venv .venv
+.venv\Scripts\activate.bat
+```
+
+- macOS / Linux:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
 Documento operativo para que los agentes ejecuten NominaPro **desde cero**, realicen cambios con bajo riesgo y cierren tareas con trazabilidad.
 
 ---
@@ -11,9 +34,9 @@ Documento operativo para que los agentes ejecuten NominaPro **desde cero**, real
 ## Flujo maestro obligatorio (orden estricto)
 
 ### Paso 1. Cargar contexto base
-1.  Leer el skill de contexto del proyecto en `prompts/1. prompt-skill.md`.
+1.  Leer el skill de contexto del proyecto en `prompts/01-prompt-skill.md`.
 2. Revisar `README.md` (arranque y troubleshooting).
-3. Revisar `docs/implementacion.md` (instalación guiada).
+3. Revisar `docs/07-implementacion.md` (instalación guiada).
 
 ### Paso 2. Preflight de entorno
 1. Verificar versiones: Python, pip, Node, npm.
@@ -63,7 +86,7 @@ Documento operativo para que los agentes ejecuten NominaPro **desde cero**, real
 4. Ajustar modelos/tablas en `backend/app/db/models.py` y sesión según necesidad.
 5. Registrar router en `backend/app/main.py` bajo `/api/{modulo}`.
 6. Validar casos: éxito, validación inválida, no encontrado.
-7. Documentar endpoints y reglas en `docs/backend.md` y `docs/funcional.md`.
+7. Documentar endpoints y reglas en `docs/backend.md` y `docs/02-funcional.md`.
 
 ---
 ## Workflow B – Ampliar módulo existente
@@ -97,7 +120,7 @@ Documento operativo para que los agentes ejecuten NominaPro **desde cero**, real
 2. Definir/ajustar autenticación y autorización por rol.
 3. Proteger rutas sensibles.
 4. Registrar eventos críticos sin exponer datos sensibles.
-5. Actualizar `docs/seguridad.md`.
+5. Actualizar `docs/04-seguridad.md`.
 
 ## Workflow E – Validación y pruebas mínimas
 
@@ -116,7 +139,7 @@ Documento operativo para que los agentes ejecuten NominaPro **desde cero**, real
 
 **Pasos**:
 1. Actualizar rutas y ejemplos JSON en `docs/backend.md`.
-2. Actualizar guía de ejecución en `docs/implementacion.md`/`README.md` si aplica.
+2. Actualizar guía de ejecución en `docs/07-implementacion.md`/`README.md` si aplica.
 3. Verificar consistencia entre prompts y documentación.
 
 ---
@@ -135,3 +158,9 @@ Documento operativo para que los agentes ejecuten NominaPro **desde cero**, real
 ## Regla de oro para agentes
 
 Ningún cambio se considera terminado si no puede ser ejecutado desde cero por otra persona siguiendo la documentación paso a paso.
+
+## Notas de alineación con el código
+- **Autenticación:** JWT ya está integrado en `backend/app/core/auth.py` y se usa en dependencias `require_roles` en routers críticos.
+- **Novedades:** `POST /api/novedades/` hace upsert por `(empleado_id, periodo)`; no hay endpoint público para filtrar novedades por `empleado_id` y/o `periodo`.
+- **Nóminas:** Orquestación en `POST /api/nominas/liquidar`; `GET /api/nominas/` devuelve historial completo sin query `periodo` por ahora.
+- **Términos:** estandarizar a `tipo_salario` en documentación y prompts.

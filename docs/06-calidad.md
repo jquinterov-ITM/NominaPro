@@ -14,9 +14,7 @@
 | Cálculo | Liquidación correcta | Valores inválidos |
 
 ## Tests Frontend (Vitest)
-Se utilizan pruebas de componentes para asegurar que la UI reaccione correctamente a los estados del backend.
-- **HomeView**: Verifica renderizado, formulario de login y estados de sesión.
-- **EmpleadosView**: Valida tabla de empleados, estados de carga y restricción de botones según permisos.
+- Pruebas de componentes para asegurar que la UI reaccione correctamente a los estados del backend.
 
 ## Calidad de Código
 - Black para backend.
@@ -25,9 +23,8 @@ Se utilizan pruebas de componentes para asegurar que la UI reaccione correctamen
 - Commits convencionales.
 
 ## Cobertura
-- Cobertura Backend: 90%+ en `backend.app.services.nomina_service`.
-- Cobertura Frontend: Pruebas unitarias para vistas principales.
-- Ejecutar `npm run test` en la carpeta `frontend` para validar la UI.
+- Cobertura Backend: meta alta en `backend.app.services.nomina_service`.
+- Ejecutar `npm run test` en la carpeta `frontend`.
 - Ejecutar `python -m pytest` para validar el motor de nómina.
 
 ## Comandos Recomendados
@@ -45,3 +42,8 @@ npm run test
 ```cmd
 .venv\Scripts\pre-commit run --all-files
 ```
+
+## Notas de alineación con el código
+- **Tests existentes:** Hay tests unitarios en `tests/unit/test_nomina_service.py` que cubren `liquidar_todos_empleados`.
+- **Integración con API real:** Las pruebas de integración deben usar los endpoints reales (`/api`) y respetar la unicidad por `(empleado_id, periodo)`; `POST /api/novedades/` hace upsert y puede causar conflictos si no se limpian datos entre pruebas.
+- **JWT en pruebas:** Para endpoints protegidos, obtener token demo en `POST /api/auth/token` y usar en encabezados `Authorization: Bearer <token>`.

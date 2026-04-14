@@ -5,6 +5,31 @@ description: Skill operativo para ejecutar y evolucionar NominaPro desde cero, c
 
 # NominaPro – Skill de Desarrollo (Ejecución desde cero)
 
+## Compatibilidad multiplataforma
+
+Los ejemplos de arranque y los comandos de este prompt funcionan en Windows (PowerShell/CMD), macOS y Linux (bash/zsh). Ejemplo mínimo para crear/activar el entorno virtual:
+
+- Windows PowerShell:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+- Windows CMD:
+
+```cmd
+python -m venv .venv
+.venv\Scripts\activate.bat
+```
+
+- macOS / Linux (bash/zsh):
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
 ## Objetivo del skill
 
 Este skill define el **paso a paso estándar** para que cualquier agente o desarrollador pueda:
@@ -135,3 +160,9 @@ cd frontend
 npm install
 npm run dev
 ```
+
+## Notas de alineación con el código
+- **Autenticación:** El backend ya expone autenticación JWT de prueba con usuario demo y roles (`RH_ADMIN`, `PAYROLL_USER`). Actualiza credenciales demo si se cambian en `core/config.py`.
+- **Novedades:** `POST /api/novedades/` realiza *upsert* por `(empleado_id, periodo)`; no existe endpoint público filtrado por `empleado_id`/`periodo` (solo listado general y acceso por `novedad_id`).
+- **Nóminas:** La generación se realiza con `POST /api/nominas/liquidar`; `GET /api/nominas/` devuelve todo y `GET /api/nominas/{id}` existe, pero no hay filtro por `periodo` en la API actual.
+- **Términos:** Usar `tipo_salario` (valores `ORDINARIO`/`INTEGRAL`) en lugar de "tipo de contrato" para coherencia con modelos y esquemas.

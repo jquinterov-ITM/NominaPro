@@ -35,3 +35,9 @@ Definir la estructura y criterios de implementación de la SPA en Vue para opera
 1. MVP de operación mensual.
 2. Validaciones y UX avanzada.
 3. Soporte de estados y trazabilidad.
+
+## Notas de alineación con el código
+- **Autenticación:** El backend ya devuelve JWT demo y roles (`RH_ADMIN`, `PAYROLL_USER`); el frontend debe obtener y almacenar el token para llamadas protegidas.
+- **Novedades y Upsert:** `POST /api/novedades/` implementa *upsert* por `(empleado_id, periodo)` — al crear novedades desde la UI, la interfaz debe manejar la actualización implícita.
+- **Filtros de consulta:** Actualmente `GET /api/nominas/` devuelve todo; no existe `GET /api/nominas?periodo=...` — si la UI necesita filtrar por período, se debe añadir soporte en el backend o filtrar en cliente (menos óptimo).
+- **Términos:** usar `tipo_salario` en formularios y validaciones (valores `ORDINARIO`/`INTEGRAL`).
