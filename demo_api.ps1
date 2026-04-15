@@ -34,8 +34,15 @@ Wait-Key
 # PASO 2: Parámetros Legales
 Show-Header "PASO 2: CONSULTA DE PARAMETROS LEGALES 2026"
 Write-Host "Solicitando reglas de negocio dinámicas..." -ForegroundColor Green
-$params = Invoke-RestMethod -Uri "$BASE_URL/parametros/2026" -Method Get -Headers $headers
-$params | ConvertTo-Json | Write-Host -ForegroundColor White
+# El backend expone GET /api/parametros (lista completa). No existe /parametros/2026.
+# Consultamos la lista y filtramos localmente por año 2026.
+$params_all = Invoke-RestMethod -Uri "$BASE_URL/parametros" -Method Get -Headers $headers
+$params = $params_all | Where-Object { $_.anio -eq 2026 }
+if (-not $params) {
+    Write-Host "No se encontraron parámetros para 2026 (usar POST para insertarlos si es necesario)." -ForegroundColor Yellow
+} else {
+    $params | ConvertTo-Json | Write-Host -ForegroundColor White
+}
 
 Wait-Key
 
@@ -72,8 +79,24 @@ Wait-Key
 # PASO 5: Liquidación
 Show-Header "PASO 5: EJECUCION DEL MOTOR DE LIQUIDACION"
 Write-Host "Calculando nómina para Mayo 2026..." -ForegroundColor Green
-$null = Invoke-RestMethod -Uri "$BASE_URL/nominas/liquidar" -Method Post -Headers $headers -Body (@{periodo="2026-05"} | ConvertTo-Json) -ContentType "application/json"
-Write-Host "Proceso completado." -ForegroundColor Green
+try {
+    $null = Invoke-RestMethod -Uri "$BASE_URL/nominas/liquidar" -Method Post -Headers $headers -Body (@{periodo="2026-05"} | ConvertTo-Json) -ContentType "application/json" -ErrorAction Stop
+    Write-Host "Proceso completado." -ForegroundColor Green
+} catch {
+    $resp = $_.Exception.Response
+    if ($resp -ne $null) {
+        $sr = New-Object System.IO.StreamReader($resp.GetResponseStream())
+        $body = $sr.ReadToEnd()
+        try {
+            $obj = $body | ConvertFrom-Json
+            Write-Host ("No se pudo liquidar: {0}" -f $obj.message) -ForegroundColor Yellow
+        } catch {
+            Write-Host ("No se pudo liquidar: {0}" -f $body) -ForegroundColor Yellow
+        }
+    } else {
+        Write-Host ("Error al ejecutar liquidación: {0}" -f $_.Exception.Message) -ForegroundColor Red
+    }
+}
 
 Wait-Key
 

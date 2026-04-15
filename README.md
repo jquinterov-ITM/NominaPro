@@ -176,6 +176,44 @@ En la raíz del proyecto hay dos scripts para demostraciones:
 - `demo_api.ps1` — PowerShell (Windows).
 - `demo_api.sh` — Bash (macOS/Linux). Hazlo ejecutable con `chmod +x demo_api.sh` y ejecútalo con `./demo_api.sh`.
 
+### Uso rápido (ya implementado)
+
+Si el proyecto ya está implementado en tu máquina (entorno creado y dependencias instaladas), usa esta guía corta para iniciar y probar sin repetir los pasos de configuración:
+
+- Backend (desde la raíz del repo):
+
+```powershell
+# Inicia la API (usa la ruta canonical definida en .env o el valor por defecto)
+python -m uvicorn backend.app.main:app --reload --port 9000
+```
+
+- Frontend (nueva terminal):
+
+```bash
+cd frontend
+npm run dev
+```
+
+- Ejecutar script de demostración (Windows PowerShell):
+
+```powershell
+.\demo_api.ps1
+```
+
+- Crear `.env` desde la plantilla (si aún no existe):
+
+```powershell
+Copy-Item .env.example .env
+```
+
+- Ejecutar tests rápidos (backend):
+
+```powershell
+.venv\Scripts\python -m pytest -q
+```
+
+Usa esta sección cuando ya tengas el proyecto implementado para evitar repetir los comandos de instalación y creación del entorno.
+
 La portada incluye un acceso de demo para obtener el token antes de usar rutas de escritura.
 
 

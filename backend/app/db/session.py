@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, inspect, text
@@ -6,9 +7,14 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 
 load_dotenv()
 
-# Para desarrollo rápido y evitar errores de conexión si no tienes PostgreSQL instalado o activo,
-# cambiamos temporalmente a SQLite local.
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./nominapro.db")
+# Por defecto usamos un fichero SQLite canonico dentro del proyecto: backend/nominapro.db
+# Esto evita que el archivo se cree en distintos lugares según el CWD del proceso.
+project_root = Path(__file__).resolve().parents[3]
+default_db_path = project_root / "backend" / "nominapro.db"
+default_database_url = f"sqlite:///{default_db_path.as_posix()}"
+
+# Permite sobreescribir con la variable de entorno DATABASE_URL si es necesario.
+DATABASE_URL = os.getenv("DATABASE_URL", default_database_url)
 
 # Forzar el uso del driver psycopg3 si el .env tiene la URL vieja con psycopg2 y decides usar postgres
 if DATABASE_URL.startswith("postgresql://"):
