@@ -1,4 +1,5 @@
 import { computed, ref, reactive } from 'vue'
+import router from '../router'
 
 import api from '../services/api'
 
@@ -61,24 +62,31 @@ const applyToken = (nextToken) => {
   persistSession()
 }
 
+const isTokenExpired = (payload) => {
+  if (!payload || !payload.exp) return true
+  const now = Math.floor(Date.now() / 1000)
+  return payload.exp <= now
+}
+
 const hydrateSession = () => {
   const storedToken = localStorage.getItem(TOKEN_KEY) || ''
-  if (!storedToken) {
+  if (!storedToken) return
+
+  const payload = decodeTokenPayload(storedToken)
+  // Si no hay campo `exp` o está vencido, limpiamos el storage y no hidratamos.
+  if (isTokenExpired(payload)) {
+    localStorage.removeItem(TOKEN_KEY)
+    localStorage.removeItem(USERNAME_KEY)
+    localStorage.removeItem(ROLES_KEY)
+    token.value = ''
+    username.value = ''
+    roles.value = []
     return
   }
 
-  const payload = decodeTokenPayload(storedToken)
   token.value = storedToken
   username.value = payload.sub || payload.username || localStorage.getItem(USERNAME_KEY) || ''
   roles.value = Array.isArray(payload.roles) ? payload.roles : readRoles()
-
-  if (!username.value) {
-    token.value = ''
-    roles.value = []
-    persistSession()
-    return
-  }
-
   persistSession()
 }
 
@@ -112,6 +120,9 @@ const login = async (inputUsername, password) => {
 const logout = () => {
   error.value = ''
   applyToken('')
+  if (router.currentRoute.value.name !== 'home') {
+    router.replace({ name: 'home' })
+  }
 }
 
 const authState = reactive({

@@ -1,16 +1,22 @@
 <template>
-  <div>
-    <h2>Gestión de Empleados</h2>
-    <div class="flex">
-      <button class="success" @click="mostrarFormulario = true">➕ Nuevo Empleado</button>
-    </div>
+  <div class="page">
+    <section class="page-head card">
+      <div>
+        <p class="eyebrow">Operación</p>
+        <h2>Gestión de Empleados</h2>
+        <p>Administra el maestro de empleados con una vista limpia y orientada a control.</p>
+      </div>
+      <div class="page-head__actions">
+        <button class="button" @click="mostrarFormulario = true">➕ Nuevo Empleado</button>
+      </div>
+    </section>
 
     <p v-if="successMessage" class="feedback success">{{ successMessage }}</p>
     <p v-if="apiError" class="feedback error">{{ apiError }}</p>
 
     <!-- Formulario para crear o editar empleado -->
-    <div v-if="mostrarFormulario" class="card mt-4">
-      <header>Crear Empleado</header>
+    <div v-if="mostrarFormulario" class="card panel-card mt-4">
+      <header class="panel-card__header">Crear Empleado</header>
       <section>
         <form @submit.prevent="guardarEmpleado">
           <div class="flex two">
@@ -40,7 +46,7 @@
             </div>
           </div>
           
-          <div class="mt-4">
+          <div class="mt-4 actions-row">
             <button type="submit" :disabled="cargando || !auth.isAuthenticated">{{ cargando ? 'Guardando...' : 'Guardar' }}</button>
             <button type="button" class="pseudo" @click="cerrarFormulario">Cancelar</button>
           </div>
@@ -53,7 +59,8 @@
     </div>
 
     <!-- Tabla de empleados -->
-    <table class="primary mt-4">
+    <section class="card table-card mt-4">
+    <table class="primary">
       <thead>
         <tr>
           <th>ID</th>
@@ -83,6 +90,7 @@
         </tr>
       </tbody>
     </table>
+    </section>
   </div>
 </template>
 
@@ -243,6 +251,66 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.page {
+  display: grid;
+  gap: 1rem;
+}
+
+.page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.4rem;
+  border: 1px solid rgba(30, 51, 77, 0.08);
+  background: linear-gradient(180deg, #fff 0%, #f8fafc 100%);
+}
+
+.page-head h2 {
+  margin: 0.35rem 0 0.35rem;
+  color: #10253d;
+}
+
+.page-head p {
+  margin: 0;
+  color: #5f7084;
+}
+
+.page-head__actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.eyebrow {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #3f67a9;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.panel-card,
+.table-card {
+  border: 1px solid rgba(30, 51, 77, 0.08);
+  background: #fff;
+}
+
+.panel-card__header {
+  padding-bottom: 0.75rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid rgba(30, 51, 77, 0.08);
+  font-weight: 700;
+  color: #10253d;
+}
+
+.actions-row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
 .mt-4 { margin-top: 20px; }
 .mt-2 { margin-top: 10px; }
 .text-center { text-align: center; }
