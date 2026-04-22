@@ -1,15 +1,18 @@
+from uuid import uuid4
+
 from fastapi.testclient import TestClient
 
-from backend.app.main import app
 from backend.app.core.auth import create_access_token
 from backend.app.core.config import settings
-from backend.app.db.session import SessionLocal
 from backend.app.db.models import Nomina
-from uuid import uuid4
+from backend.app.db.session import SessionLocal
+from backend.app.main import app
 
 
 def get_token():
-    return create_access_token({"sub": settings.DEMO_USERNAME, "roles": settings.demo_roles_list})
+    return create_access_token(
+        {"sub": settings.DEMO_USERNAME, "roles": settings.demo_roles_list}
+    )
 
 
 def test_novedades_and_nominas_filters():
@@ -30,8 +33,18 @@ def test_novedades_and_nominas_filters():
     emp_id = emp["id"] if isinstance(emp, list) else emp["id"]
 
     # Create two novedades for different periodos
-    nov1 = {"empleado_id": emp_id, "periodo": "2026-04", "tipo": "HORA_EXTRA", "valor": "100.00"}
-    nov2 = {"empleado_id": emp_id, "periodo": "2026-05", "tipo": "HORA_EXTRA", "valor": "50.00"}
+    nov1 = {
+        "empleado_id": emp_id,
+        "periodo": "2026-04",
+        "tipo": "HORA_EXTRA",
+        "valor": "100.00",
+    }
+    nov2 = {
+        "empleado_id": emp_id,
+        "periodo": "2026-05",
+        "tipo": "HORA_EXTRA",
+        "valor": "50.00",
+    }
 
     r1 = client.post("/api/novedades/", json=nov1, headers=headers)
     assert r1.status_code == 201
@@ -48,8 +61,20 @@ def test_novedades_and_nominas_filters():
     # Insert nominas directly via DB session
     db = SessionLocal()
     try:
-        n1 = Nomina(periodo="2026-04", empleado_id=emp_id, total_devengado=100, total_deducido=0, neto_pagar=100)
-        n2 = Nomina(periodo="2026-05", empleado_id=emp_id, total_devengado=200, total_deducido=0, neto_pagar=200)
+        n1 = Nomina(
+            periodo="2026-04",
+            empleado_id=emp_id,
+            total_devengado=100,
+            total_deducido=0,
+            neto_pagar=100,
+        )
+        n2 = Nomina(
+            periodo="2026-05",
+            empleado_id=emp_id,
+            total_devengado=200,
+            total_deducido=0,
+            neto_pagar=200,
+        )
         db.add(n1)
         db.add(n2)
         db.commit()
@@ -61,4 +86,6 @@ def test_novedades_and_nominas_filters():
     assert resn.status_code == 200
     nd = resn.json()
     assert any(item["periodo"] == "2026-04" for item in nd)
-    assert all(item["periodo"] == "2026-04" for item in nd if item["periodo"] == "2026-04")
+    assert all(
+        item["periodo"] == "2026-04" for item in nd if item["periodo"] == "2026-04"
+    )

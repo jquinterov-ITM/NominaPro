@@ -54,6 +54,8 @@ Genera un documento de seguridad en Markdown que incluya:
 - Autenticación obligatoria con JWT usando `Security` de FastAPI.
 - Exigir roles estandarizados para uso de endpoints: `RH_ADMIN` (para crear empleados) y `PAYROLL_USER` (para generar nóminas).
 - Middleware de verificación de log/token auditable.
+ 
+Nota operativa: Para desarrollo, usa `.env.example` → `.env` y no incluyas `SECRET_KEY` en el repositorio. Usa `scripts/get_token.py` o el endpoint `POST /api/auth/token` para pruebas locales; en CI/producción provee `SECRET_KEY` vía variables de entorno.
 
 #### 3.2 Fase 2 – Roles
 - Roles sugeridos: `admin`, `analista_nomina`, `consulta`.
@@ -92,3 +94,11 @@ Genera un documento de seguridad en Markdown que incluya:
 - **JWT presente:** El código ya implementa JWT demo y validación por roles (`require_roles`) en routers; actualizar el prompt para trabajar con tokens de prueba en desarrollo.
 - **EndPoints críticos:** `POST /api/empleados/` (creación con validaciones), `POST /api/novedades/` (upsert), `POST /api/nominas/liquidar`.
 - **Recomendación:** Probar con credenciales demo definidas en `backend/app/core/config.py` y documentar pasos de obtención de token en `docs/07-implementacion.md`.
+
+## Cambios recientes (resumen)
+
+- Se movieron secretos a `.env` y se incluyó `.env.example`.
+- `create_access_token` y `scripts/get_token.py` facilitan pruebas locales con JWT.
+- Añadido `pre-commit` para formato/linters y un workflow CI básico; aplicar `pre-commit run --all-files` antes de commits.
+
+Recomendación operativa: rotar `SECRET_KEY` y evitar exponerlo en repositorios públicos; usar variables de entorno en CI y entornos de despliegue.

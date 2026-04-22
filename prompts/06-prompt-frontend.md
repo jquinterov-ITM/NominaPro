@@ -56,6 +56,7 @@ Genera un documento en Markdown que incluya:
 - Manejo de token JWT (si aplica en fases posteriores).
 - Protección de rutas por rol.
 - No exponer secretos en cliente.
+ - Recomendación práctica: en desarrollo el script `scripts/get_token.py` puede facilitar pruebas, pero en producción evita `localStorage` para tokens; prefiere HttpOnly cookies o flujo de refresh tokens seguro.
 
 ### 5. Calidad Frontend
 - Pruebas unitarias de componentes críticos (Vitest + Vue Test Utils).
@@ -82,3 +83,11 @@ Genera un documento en Markdown que incluya:
 
 ## Pruebas Frontend existentes
 - El frontend usa `vitest` (ver `frontend/package.json`) y contiene pruebas de componentes en `frontend/src/__tests__/` (Ej.: `EmpleadosView.spec.js`, `HomeView.spec.js`). Añadir cobertura e integración E2E según roadmap.
+
+## Cambios recientes (resumen)
+
+- Se añadió `scripts/get_token.py` para generar tokens de prueba desde la CLI; los ejemplos en `docs/07-implementacion.md` muestran cómo obtener token desde consola.
+- Recomendado: evitar almacenar tokens en `localStorage` en producción; considerar HttpOnly cookies/refresh-token seguro.
+- `pre-commit` y formateo aplicado al frontend/backend para mantener consistencia, y se agregó un workflow CI inicial.
+
+Verifica que el `VITE_API_URL` o el proxy de Vite apunten al backend correcto tras aplicar migraciones o cambiar `DATABASE_URL`.

@@ -1,8 +1,10 @@
+import atexit
 import os
 from pathlib import Path
 
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, inspect, text
+from sqlalchemy.engine.url import make_url
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 load_dotenv()
@@ -22,7 +24,29 @@ if DATABASE_URL.startswith("postgresql://"):
 
 # connect_args solo es necesario para SQLite
 kwargs = {"check_same_thread": False} if "sqlite" in DATABASE_URL else {}
+if "sqlite" in DATABASE_URL:
+    try:
+        url = make_url(DATABASE_URL)
+        db_path = url.database
+        if db_path:
+            db_file = Path(db_path)
+            db_dir = db_file.parent
+            if not db_dir.exists():
+                db_dir.mkdir(parents=True, exist_ok=True)
+            # Ensure file exists so SQLite can open it (creates empty file if needed)
+            if not db_file.exists():
+                try:
+                    db_file.touch()
+                except Exception:
+                    # best-effort: continue and let SQLAlchemy report if still failing
+                    pass
+    except Exception:
+        pass
+
 engine = create_engine(DATABASE_URL, connect_args=kwargs)
+# Ensure SQLAlchemy disposes engine connections on interpreter exit to avoid
+# sqlite3 ResourceWarning about unclosed DB connections during tests.
+atexit.register(lambda: engine.dispose())
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
@@ -108,11 +132,17 @@ def ensure_sqlite_nomina_schema() -> None:
                 )
             if "fecha" not in existing_aud_cols:
                 connection.execute(
-                    text("ALTER TABLE auditoria ADD COLUMN fecha DATETIME DEFAULT (CURRENT_TIMESTAMP)")
+                    text(
+                        "ALTER TABLE auditoria ADD COLUMN fecha DATETIME DEFAULT (CURRENT_TIMESTAMP)"
+                    )
                 )
 
 
-ensure_sqlite_nomina_schema()
+# Legacy ad-hoc schema adjustments (kept for demo/development).
+# Prefer using Alembic for production migrations. To disable ad-hoc
+# schema fixes set environment variable `USE_ALEMBIC=1`.
+if os.getenv("USE_ALEMBIC", "0") != "1":
+    ensure_sqlite_nomina_schema()
 
 
 def get_db():

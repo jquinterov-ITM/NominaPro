@@ -84,6 +84,8 @@ NominaPro/
    - Windows PowerShell: `.venv\Scripts\Activate.ps1`
 3. Instalar dependencias:
    - `pip install -r backend/requirements.txt`
+   - Nota: después de instalar dependencias copia `.env.example` a `.env` y confirme `SECRET_KEY` y `DATABASE_URL`.
+   - Si usas migraciones, aplica Alembic antes de levantar la API: `python -m alembic -c backend/alembic.ini upgrade head`.
 4. Configurar base local o productiva:
    - SQLite local recomendado: `DATABASE_URL=sqlite:///./nominapro.db`
    - PostgreSQL (si aplica): `DATABASE_URL=postgresql+psycopg://usuario:password@localhost:5432/nominapro`
@@ -175,3 +177,71 @@ npm run dev
  - **Nóminas:** La generación se realiza con `POST /api/nominas/liquidar`; `GET /api/nominas/` devuelve historial y soporta filtro `?periodo=YYYY-MM`.
  - **Auditoría:** Se añadió `POST /api/auditoria/` y `GET /api/auditoria/` protegidos por `RH_ADMIN` para trazabilidad administrativa.
 - **Términos:** Usar `tipo_salario` (valores `ORDINARIO`/`INTEGRAL`) en lugar de "tipo de contrato" para coherencia con modelos y esquemas.
+
+## Cambios recientes (resumen)
+
+- Mover secretos a variables de entorno y añadir `.env.example` con valores recomendados.
+- Añadida gestión de migraciones con Alembic (`backend/alembic/` y migraciones iniciales).
+- Integración de `pre-commit` (black, isort, ruff) y workflow CI básico en `.github/workflows/ci.yml`.
+- Correcciones de estabilidad: se evita ResourceWarning cerrando el motor SQLAlchemy al salir (`engine.dispose()`), y se reemplazaron datetimes ingenuos por `datetime.now(timezone.utc)`; JWT `exp` ahora es timestamp entero.
+- Tests y scripts usan `create_access_token` para generar tokens de prueba; hay un script demo (`demo_api.ps1`) que obtiene token vía API.
+
+## Implementación desde cero (comandos mínimos verificables)
+
+1) Crear y activar entorno virtual
+
+- PowerShell:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+2) Instalar dependencias (backend)
+
+```powershell
+pip install -r backend/requirements.txt
+```
+
+3) Variables de entorno
+
+```powershell
+# Copiar ejemplo y editar si es necesario
+Copy-Item .env.example .env
+```
+
+4) Aplicar migraciones Alembic
+
+```powershell
+# desde la raíz del repo (asegúrate de que 'alembic' esté instalado en el venv)
+alembic -c backend/alembic.ini upgrade head
+# alternativa si 'alembic' no está en PATH dentro del venv:
+python -m alembic -c backend/alembic.ini upgrade head
+```
+
+5) Instalar y ejecutar pre-commit (recomendado)
+
+```powershell
+pip install pre-commit
+pre-commit install
+pre-commit run --all-files
+```
+
+6) Iniciar API y ejecutar pruebas
+
+```powershell
+python -m uvicorn app.main:app --reload --app-dir backend --host 127.0.0.1 --port 9000
+# en otra terminal
+pytest -q
+```
+
+7) Obtener token de prueba desde consola (ejemplo rápido)
+
+```powershell
+python - <<'PY'
+from backend.app.core.auth import create_access_token
+print(create_access_token({"sub":"admin","roles":["RH_ADMIN"]}))
+PY
+```
+
+Si quieres, puedo añadir un script `scripts/get_token.py` para imprimir un token CLI-friendly.

@@ -76,6 +76,8 @@ backend/
 └── requirements.txt
 ```
 
+Nota: incluye una carpeta `backend/alembic/` en el control de versiones si gestionas migraciones, y asegúrate de listar `alembic` en `requirements.txt` para entornos limpios.
+
 ### 4. Validación y Errores
 - Definir validaciones de request por endpoint (campos requeridos, tipos y rangos).
 - Estandarizar respuestas de error con formato único (ej. `{ message, code, details }`).
@@ -119,3 +121,12 @@ backend/
  - **Nóminas:** Orquestación en `POST /api/nominas/liquidar`; `GET /api/nominas/` devuelve historial y soporta filtro por `?periodo=YYYY-MM`.
  - **Novedades:** `GET /api/novedades/` soporta filtros `?empleado_id=` y `?periodo=` para facilitar consultas del frontend.
 - **Modelos:** `ParametrosLegales`, `Empleado`, `Novedad`, `Nomina` están implementados en `backend/app/db/models.py` y los esquemas en `backend/app/schemas.py`.
+
+## Cambios recientes (resumen)
+
+- `.env.example` añadido; mover secretos a variables de entorno.
+- Alembic configurado en `backend/alembic/` y migración inicial disponible; seguir `docs/07-implementacion.md` para aplicar migraciones.
+- `pre-commit` integrado (black/isort/ruff) y un workflow CI básico añadido.
+- Pequeñas correcciones operativas: cierre de engine al salir y uso de timestamps enteros en JWT `exp`.
+
+Recomendación: verificar `backend/requirements.txt` y añadir `alembic` si planeas usar migraciones en entornos limpios.

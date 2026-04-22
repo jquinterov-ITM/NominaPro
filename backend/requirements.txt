@@ -12,3 +12,4 @@ isort
 python-multipart
 pytest
 pytest-cov
+alembic

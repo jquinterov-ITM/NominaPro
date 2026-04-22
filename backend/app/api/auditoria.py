@@ -9,14 +9,18 @@ from ..repositories.auditoria_repository import AuditoriaRepository
 router = APIRouter()
 
 
-@router.post("/", response_model=schemas.AuditoriaResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/", response_model=schemas.AuditoriaResponse, status_code=status.HTTP_201_CREATED
+)
 def crear_auditoria(
     payload: schemas.AuditoriaCreate,
     current_user: dict = Depends(require_roles("RH_ADMIN")),
     db: Session = Depends(get_db),
 ):
     repo = AuditoriaRepository(db)
-    rec = repo.create(usuario_id=payload.usuario_id, accion=payload.accion, detalle=payload.detalle)
+    rec = repo.create(
+        usuario_id=payload.usuario_id, accion=payload.accion, detalle=payload.detalle
+    )
     return rec
 
 

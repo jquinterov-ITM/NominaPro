@@ -1,6 +1,5 @@
-from pathlib import Path
 import sqlite3
-
+from pathlib import Path
 
 db_path = Path(__file__).resolve().parent / "nominapro.db"
 

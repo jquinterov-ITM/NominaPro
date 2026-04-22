@@ -79,6 +79,8 @@ NominaPro/
 - Conexión administrada por SQLAlchemy (compatible SQLite/PostgreSQL).
 - Tablas principales: `empleados`, `novedades`, `nominas`.
 - Restricciones de unicidad por documento y por `(empleado_id, periodo)`.
+ - Migraciones: el proyecto incluye Alembic (`backend/alembic/`) para gestionar cambios de esquema; aplícalas en entornos nuevos con `python -m alembic -c backend/alembic.ini upgrade head`.
+ - Estabilidad: el `session` cierra el engine en el shutdown para evitar ResourceWarning (ver `backend/app/db/session.py`).
 
 ### 4. Comunicación entre Componentes
 - Protocolo HTTP/REST + JSON.
@@ -121,3 +123,12 @@ El sistema ha materializado la arquitectura definida empleando Vue 3 con Vite en
 - **Endpoints reales:** En el código actual los routers están bajo `/api` y los endpoints principales son `POST /api/empleados/`, `GET /api/empleados/`, `PUT /api/empleados/{id}`, `DELETE /api/empleados/{id}`, `POST /api/novedades/` (upsert), `GET /api/novedades/`, `POST /api/nominas/liquidar`, `GET /api/nominas/` y `GET /api/nominas/{id}`.
 - **Filtros:** Los endpoints `GET /novedades/` y `GET /nominas/` devuelven el historial completo sin filtros por `periodo`. Se sugiere implementar `?periodo=YYYY-MM` si el frontend lo requiere.
 - **Términos y modelos:** usar `tipo_salario` en documentación y UI (valores `ORDINARIO`/`INTEGRAL`).
+
+## Cambios recientes (resumen)
+
+- Se añadió `.env.example` y se recomendó usar variables de entorno para secretos.
+- Se integró Alembic en `backend/alembic/` con migración inicial; pasos reproducibles en `docs/07-implementacion.md`.
+- `pre-commit` (black/isort/ruff) se incorporó y hay un workflow CI básico.
+- Correcciones de estabilidad: cierre de engine en salida y uso de timestamps enteros para `exp` en JWT.
+
+Actualiza los diagramas si cambias la topología de despliegue (SQLite local vs PostgreSQL en producción).

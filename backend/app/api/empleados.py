@@ -142,6 +142,7 @@ def actualizar_empleado(
     db.refresh(empleado)
     return empleado
 
+
 @router.delete("/{empleado_id}", status_code=status.HTTP_200_OK)
 def eliminar_empleado(
     empleado_id: int,

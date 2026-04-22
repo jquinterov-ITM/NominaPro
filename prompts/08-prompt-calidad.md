@@ -97,6 +97,19 @@ Incluye comandos sugeridos (según herramientas elegidas), por ejemplo:
 - reporte de cobertura,
 - lint y formato.
 
+Comandos prácticos:
+
+```bash
+# Activar entorno
+source .venv/bin/activate  # o .venv\Scripts\Activate.ps1 en Windows
+# Aplicar migraciones
+python -m alembic -c backend/alembic.ini upgrade head
+# Formatear + lint con pre-commit
+pre-commit run --all-files
+# Ejecutar tests
+pytest -q
+```
+
 ## Formato de Salida
 - Markdown con tablas, checklist y ejemplos de casos de prueba.
 
@@ -104,3 +117,11 @@ Incluye comandos sugeridos (según herramientas elegidas), por ejemplo:
 - **Tests existentes:** Hay tests unitarios en `tests/unit/test_nomina_service.py` que cubren `liquidar_todos_empleados`.
 - **Práctica requerida:** las pruebas de integración deben usar endpoints reales (`/api`) y una DB de pruebas; evitar simulaciones en memoria.
 - **Endpoints y validaciones:** documentar en los tests el comportamiento *upsert* de `POST /api/novedades/` y la ausencia de `GET /api/nominas?periodo` si se confía en esa funcionalidad.
+
+## Cambios recientes (resumen)
+
+- Se ejecutó `pre-commit` y se aplicaron formateos/ajustes de imports en backend y tests; integra pre-commit en tu flujo local.
+- Añadido soporte de migraciones Alembic y pasos reproducibles en `docs/07-implementacion.md` para entornos limpios.
+- Se creó `scripts/get_token.py` para facilitar generación de JWT de prueba en tests manuales.
+
+Incluye estos pasos en tus pipelines de CI para que los checks de formato y tests se ejecuten antes del merge.

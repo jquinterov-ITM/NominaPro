@@ -79,6 +79,8 @@ DATABASE_URL=sqlite:///./nominapro.db
 # DATABASE_URL=postgresql+psycopg://postgres:postgres@localhost:5432/nominapro
 ```
 
+Nota: copia `.env.example` a `.env` y no subas el archivo `.env` al repositorio. Si vas a usar migraciones en entornos nuevos, agrega `alembic` a `backend/requirements.txt` y aplica las migraciones con `python -m alembic -c backend/alembic.ini upgrade head` antes de arrancar la API.
+
 #### 3.2 Instalación y ejecución
 Sigue estos pasos según tu sistema operativo. Se asume `python` apunta a Python 3.11+.
 
@@ -192,3 +194,12 @@ Incluye ejemplos de requests/responses JSON para cada paso.
 - **Endpoints reales y pruebas:** usar `POST /api/nominas/liquidar` para generación; documentar tokens JWT de demo para pruebas automatizadas.
 - **Novedades:** `POST /api/novedades/` realiza upsert; los tests de integración deben crear/limpiar datos para evitar conflictos por unique constraints `(empleado_id, periodo)`.
 - **Filtros en API:** si la implementación del frontend necesita `GET /api/nominas?periodo=...` o `GET /api/novedades?empleado_id=...`, se deberán añadir esos filtros en los routers o implementar endpoints dedicados.
+
+## Cambios recientes (resumen)
+
+- `.env.example` añadido y recomendación de usar variables de entorno para configuración y secretos.
+- Alembic configurado en `backend/alembic/` con migración inicial; ver `docs/07-implementacion.md` para pasos reproducibles.
+- `scripts/get_token.py` proporciona una forma rápida de generar JWTs de prueba; también existe `demo_api.ps1` para demostraciones interactivas.
+- Ejecuta `pre-commit run --all-files` tras instalar dependencias para aplicar formato e import fixes antes de commits.
+
+Estos cambios buscan que la implementación desde cero sea reproducible y segura en cualquier entorno de desarrollo.

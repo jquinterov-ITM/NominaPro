@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.requests import Request
 from fastapi.responses import JSONResponse
 
-from .api import auth, empleados, nominas, novedades, parametros, auditoria
+from .api import auditoria, auth, empleados, nominas, novedades, parametros
 from .core.config import settings
 from .db import models
 from .db.session import Base, engine, ensure_sqlite_nomina_schema
@@ -74,4 +74,3 @@ app.include_router(novedades.router, prefix="/api", tags=["novedades"])
 app.include_router(nominas.router, prefix="/api", tags=["nominas"])
 app.include_router(auth.router, prefix="/api", tags=["auth"])
 app.include_router(auditoria.router, prefix="/api/auditoria", tags=["auditoria"])
-

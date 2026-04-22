@@ -1,12 +1,14 @@
 from fastapi.testclient import TestClient
 
-from backend.app.main import app
 from backend.app.core.auth import create_access_token
 from backend.app.core.config import settings
+from backend.app.main import app
 
 
 def get_token():
-    return create_access_token({"sub": settings.DEMO_USERNAME, "roles": settings.demo_roles_list})
+    return create_access_token(
+        {"sub": settings.DEMO_USERNAME, "roles": settings.demo_roles_list}
+    )
 
 
 def test_auditoria_api_post_and_get():

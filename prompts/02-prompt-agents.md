@@ -49,6 +49,9 @@ Documento operativo para que los agentes ejecuten NominaPro **desde cero**, real
 3. Configurar SQLite local (`DATABASE_URL=sqlite:///./nominapro.db`) cuando aplique.
 4. Ejecutar:
    - `uvicorn app.main:app --reload --app-dir backend`
+   - Antes de ejecutar, asegúrate de haber copiado `.env.example` a `.env` y, si corresponde, haber aplicado migraciones:
+     - `python -m alembic -c backend/alembic.ini upgrade head`
+   - Ejecuta `pre-commit run --all-files` para aplicar formato/imports antes de trabajar en el código.
 5. Validar:
    - `/docs`
    - endpoints principales bajo `/api`.
@@ -101,6 +104,7 @@ El proyecto cuenta con comandos y directrices específicas. Si estás en un ento
 2. Revisar modelos/esquemas impactados.
 3. Implementar validación de entrada y manejo homogéneo de errores.
 4. Probar compatibilidad con frontend existente.
+5. Para pruebas locales rápidas puedes generar un token con `scripts/get_token.py` o usar el endpoint `POST /api/auth/token` (ver `demo_api.ps1`).
 5. Actualizar documentación del módulo.
 
 ### 3. `/code-review` (Refactor por capas sin romper API)
@@ -208,3 +212,12 @@ Ningún cambio se considera terminado si no puede ser ejecutado desde cero por o
 - **Novedades:** `POST /api/novedades/` hace upsert por `(empleado_id, periodo)`; no hay endpoint público para filtrar novedades por `empleado_id` y/o `periodo`.
 - **Nóminas:** Orquestación en `POST /api/nominas/liquidar`; `GET /api/nominas/` devuelve historial completo sin query `periodo` por ahora.
 - **Términos:** estandarizar a `tipo_salario` en documentación y prompts.
+ 
+## Cambios recientes (resumen)
+
+- Se centralizó la gestión de secretos en variables de entorno; existe `.env.example` con valores recomendados.
+- Se añadió soporte de migraciones con Alembic (`backend/alembic/`) y se proporcionaron pasos reproducibles en `docs/07-implementacion.md`.
+- Añadido `scripts/get_token.py` para generar JWT de prueba desde la CLI y ejemplos de obtención de token via API (`demo_api.ps1`).
+- Se integró `pre-commit` (black, isort, ruff) y se añadió un workflow CI básico.
+
+Incluye en tus runbooks los pasos de arranque de `docs/07-implementacion.md` para asegurar reproducibilidad desde cero.

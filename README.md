@@ -95,6 +95,12 @@ La configuración local funciona con los valores por defecto del proyecto, pero 
 - Backend: `DATABASE_URL`, `SECRET_KEY`, `DEMO_USERNAME`, `DEMO_PASSWORD`, `DEMO_ROLES`, `ALLOWED_ORIGINS`.
 - Frontend: `VITE_API_URL` solo si quieres apuntar a un backend distinto del proxy local.
 
+Recomendación de uso:
+
+- Copia `.env.example` a `.env` y personaliza los valores antes de ejecutar el proyecto.
+- No subas `.env` al control de versiones. Asegúrate de incluir `.env` en tu `.gitignore`.
+- Define `SECRET_KEY` para entornos de staging/producción con una cadena larga y segura.
+
 El proyecto está pensado para operar en modo demo local por defecto:
 
 - Usuario: `admin`

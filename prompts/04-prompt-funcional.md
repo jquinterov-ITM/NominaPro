@@ -36,6 +36,7 @@ Generar el archivo `/docs/02-funcional.md` de **NominaPro**.
 - El usuario crea, consulta y elimina empleados y novedades con llamadas reales al backend.
 - La nómina se liquida contra datos persistidos; no debe existir lógica de simulación en memoria.
 - Los errores 400/422 deben mostrarse de forma entendible para el usuario final.
+ - Autenticación y pruebas: el backend expone JWT de prueba y existen utilidades para generar tokens (`create_access_token` y `scripts/get_token.py`). Asegura que los flujos de UI consuman endpoints reales protegidos.
 
 ## Instrucciones
 
@@ -102,3 +103,11 @@ Incluye un diagrama Mermaid (`flowchart` o `sequenceDiagram`) con:
 
 ## Formato de Salida
 - Markdown bien estructurado con headers, listas, tablas y diagrama Mermaid cuando aplique.
+
+## Cambios recientes (resumen)
+
+- Se añadieron `.env.example` y pasos reproducibles en `docs/07-implementacion.md` para arranque desde cero.
+- Migraciones con Alembic disponibles en `backend/alembic/` y `scripts/get_token.py` para generar JWT de prueba desde CLI.
+- Integración de `pre-commit` (black/isort/ruff) para mantener formato e imports consistentes.
+
+Incluye estos pasos en tus flujos de verificación funcional para asegurar reproducibilidad.
