@@ -9,7 +9,7 @@ El frontend consume esa API y permite revisar la información desde el navegador
 - Backend: FastAPI, SQLAlchemy, Pydantic v2, SQLite.
 - Seguridad: JWT con roles para proteger rutas sensibles.
 - Calidad: pytest, black, isort, pre-commit.
-- Frontend: Vue 3 + Vite.
+- Frontend: Vue 3 + Vite + Pinia + Vue Router + Axios.
 
 ## Estructura del proyecto
 
@@ -81,6 +81,18 @@ Este flujo muestra el recorrido real de una liquidacion:
 - Token JWT para proteger rutas de liquidacion y eliminacion.
 - Validaciones con Pydantic y reglas de negocio en servicios.
 - El backend usa variables de entorno para `SECRET_KEY`, roles demo y orígenes permitidos.
+
+## Frontend implementado (estado real)
+
+- Login demo con `admin/secret` contra `POST /api/auth/token`.
+- Manejo de token con Pinia (`src/stores/auth.ts`) y persistencia en `localStorage`.
+- Guardas de ruta en `src/router/guards.ts` para evitar acceso sin autenticación.
+- Header y navegación visibles solo con sesión activa.
+- Interceptor Axios en `src/services/api.ts` para enviar `Authorization: Bearer <token>`.
+- Manejo automático de `401`: cierre de sesión y redirección a `/login`.
+- Módulo Empleados con crear, listar y eliminar (con confirmación).
+- Módulo Novedades con formulario y listado.
+- Módulo Nóminas con listado de resultados.
 
 ## Requisitos previos
 
@@ -176,6 +188,11 @@ Luego abre: http://localhost:5173
 
 Si el frontend no encuentra el backend, revisa la variable `VITE_API_URL` o usa el proxy local de Vite.
 
+Configuración actual de desarrollo:
+
+- `vite.config.js` tiene proxy de `'/api'` hacia `http://localhost:9000`.
+- Si `VITE_API_URL` no está definida, el frontend usa `'/api'` por defecto.
+
 ### Scripts de demostración
 
 En la raíz del proyecto hay dos scripts para demostraciones:
@@ -234,6 +251,8 @@ La portada tiene un formulario de acceso rapido para generar el token y mantener
 POST /api/auth/token
 ```
 
+Importante: este endpoint espera `application/x-www-form-urlencoded` (no JSON).
+
 Credenciales de demo:
 
 - Usuario: `admin`
@@ -269,7 +288,7 @@ Respuesta esperada:
 ### Liquidar nomina
 
 ```cmd
-curl -X POST http://localhost:8000/api/nominas/liquidar ^
+curl -X POST http://127.0.0.1:9000/api/nominas/liquidar ^
 	-H "Content-Type: application/json" ^
 	-H "Authorization: Bearer eyJhbGciOi..." ^
 	-d "{\"periodo\":\"2026-01\"}"
@@ -284,7 +303,7 @@ Respuesta esperada:
 		"empleado_id": 10,
 		"periodo": "2026-01",
 		"total_devengado": "4250000.00",
-		"total_deducciones": "512000.00",
+		"total_deducido": "512000.00",
 		"neto_pagar": "3738000.00"
 	}
 ]
@@ -302,8 +321,10 @@ Respuesta esperada:
 
 ```cmd
 cd frontend
-npm run test
+npm run build
 ```
+
+Nota: en el estado actual del proyecto no hay script `test` configurado en `frontend/package.json`; los scripts disponibles son `dev`, `build` y `preview`.
 
 ## Recursos para Exposicion
 El proyecto incluye un script interactivo y una guia para demostraciones tecnicas de la API:

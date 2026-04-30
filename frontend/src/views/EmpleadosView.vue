@@ -1,322 +1,292 @@
 <template>
-  <div class="page">
-    <section class="page-head card">
-      <div>
-        <p class="eyebrow">Operación</p>
-        <h2>Gestión de Empleados</h2>
-        <p>Administra el maestro de empleados con una vista limpia y orientada a control.</p>
-      </div>
-      <div class="page-head__actions">
-        <button class="button" @click="mostrarFormulario = true">➕ Nuevo Empleado</button>
-      </div>
-    </section>
-
-    <p v-if="successMessage" class="feedback success">{{ successMessage }}</p>
-    <p v-if="apiError" class="feedback error">{{ apiError }}</p>
-
-    <!-- Formulario para crear o editar empleado -->
-    <div v-if="mostrarFormulario" class="card panel-card mt-4">
-      <header class="panel-card__header">Crear Empleado</header>
-      <section>
-        <form @submit.prevent="guardarEmpleado">
-          <div class="flex two">
-            <div class="field">
-              <label>Nombre Completo</label>
-              <input type="text" v-model="nuevoEmpleado.nombre" required />
-            </div>
-            <div class="field">
-              <label>Identificación</label>
-              <input type="text" v-model="nuevoEmpleado.identificacion" required />
-            </div>
-            <div class="field">
-              <label>Tipo de Salario</label>
-              <select v-model="nuevoEmpleado.tipo_salario" required>
-                <option value="ORDINARIO">Ordinario</option>
-                <option value="INTEGRAL">Integral (Mínimo 13 SMMLV)</option>
-              </select>
-            </div>
-            <div class="field">
-              <label>Salario Base (COP)</label>
-              <input type="text" v-model="salarioBaseFormatted" placeholder="Ej: 1.500.000" required />
-              <small class="error" v-if="errorSalario">{{ errorSalario }}</small>
-              <small v-else-if="parametroVigente" class="hint">
-                Salario integral mínimo del año {{ currentYear }}: $ {{ Number(parametroVigente.smmlv * 13).toLocaleString('es-CO') }}
-              </small>
-              <small v-else-if="cargandoParametros" class="hint">Validando parámetros legales...</small>
-            </div>
-          </div>
-          
-          <div class="mt-4 actions-row">
-            <button type="submit" :disabled="cargando || !auth.isAuthenticated">{{ cargando ? 'Guardando...' : 'Guardar' }}</button>
-            <button type="button" class="pseudo" @click="cerrarFormulario">Cancelar</button>
-          </div>
-
-          <p v-if="!auth.isAuthenticated" class="feedback hint">
-            Inicia sesión en la portada para habilitar la creación y eliminación.
-          </p>
-        </form>
-      </section>
+  <div class="empleados-page">
+    <div class="page-header">
+      <h1>Empleados</h1>
+      <p>Crear, consultar y eliminar empleados desde una interfaz más limpia.</p>
     </div>
 
-    <!-- Tabla de empleados -->
-    <section class="card table-card mt-4">
-    <table class="primary">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nombre</th>
-          <th>Identificación</th>
-          <th>Tipo Salario</th>
-          <th>Salario Base</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-if="cargandoLista">
-          <td colspan="6" class="text-center">Cargando...</td>
-        </tr>
-        <tr v-else-if="empleados.length === 0">
-          <td colspan="6" class="text-center">No hay empleados registrados.</td>
-        </tr>
-        <tr v-for="emp in empleados" :key="emp.id">
-          <td>{{ emp.id }}</td>
-          <td>{{ emp.nombre }}</td>
-          <td>{{ emp.documento }}</td>
-          <td><span class="label">{{ emp.tipo_salario }}</span></td>
-          <td>$ {{ Number(emp.salario_base).toLocaleString('es-CO') }}</td>
-          <td>
-            <button class="small bg-error" @click="eliminar(emp.id)">Eliminar</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    </section>
+    <form class="empleado-form card" novalidate @submit.prevent="crearEmpleado">
+      <div class="field-group">
+        <label>Nombre</label>
+        <input v-model="form.nombre" required />
+      </div>
+
+      <div class="field-group">
+        <label>Documento</label>
+        <input v-model="form.documento" required />
+      </div>
+
+      <div class="field-group">
+        <label>Salario base</label>
+        <input
+          v-model="form.salario_base"
+          type="text"
+          placeholder="Ej: 1500000 o 1.500.000"
+          required
+        />
+      </div>
+
+      <div class="field-group field-group--wide">
+        <label>Tipo salario</label>
+        <select v-model="form.tipo_salario">
+          <option value="ORDINARIO">ORDINARIO</option>
+          <option value="INTEGRAL">INTEGRAL</option>
+        </select>
+      </div>
+
+      <div class="actions">
+        <button :disabled="saving">{{ saving ? 'Guardando...' : 'Crear empleado' }}</button>
+      </div>
+    </form>
+
+    <p v-if="error" class="error">{{ error }}</p>
+    <p v-if="success" class="success">{{ success }}</p>
+
+    <div v-if="loading">Cargando...</div>
+    <div v-else class="list-space">
+      <EmployeeCard
+        v-for="e in empleados"
+        :key="e.id"
+        :empleado="e"
+        :deleting="deletingId === e.id"
+        @delete="eliminarEmpleado"
+      />
+    </div>
   </div>
 </template>
 
-<script setup>
-import { ref, computed, onMounted } from 'vue'
-
+<script lang="ts">
+import { ref, onMounted } from 'vue'
 import api from '../services/api'
-import { useAuthStore } from '../stores/auth'
+import EmployeeCard from '../components/EmployeeCard.vue'
 
-const empleados = ref([])
-const parametrosLegales = ref([])
-const mostrarFormulario = ref(false)
-const cargando = ref(false)
-const cargandoLista = ref(false)
-const cargandoParametros = ref(false)
-const formError = ref('')
-const errorSalario = ref('')
-const apiError = ref('')
-const successMessage = ref('')
-const auth = useAuthStore()
-const currentYear = new Date().getFullYear()
+export default {
+  components: { EmployeeCard },
+  setup() {
+    const empleados = ref([])
+    const loading = ref(false)
+    const saving = ref(false)
+    const deletingId = ref<number | null>(null)
+    const error = ref('')
+    const success = ref('')
 
-const empleadoVacio = {
-  nombre: '',
-  identificacion: '',
-  tipo_salario: 'ORDINARIO',
-  salario_base: null
-}
+    const form = ref({
+      nombre: '',
+      documento: '',
+      salario_base: '',
+      tipo_salario: 'ORDINARIO'
+    })
 
-const nuevoEmpleado = ref({ ...empleadoVacio })
-
-const salarioBaseFormatted = computed({
-  get: () => {
-    if (!nuevoEmpleado.value.salario_base) return ''
-    return Number(nuevoEmpleado.value.salario_base).toLocaleString('es-CO')
-  },
-  set: (newValue) => {
-    // Quita todo lo que no sea número para calcular el valor real
-    const stringNumerico = newValue.replace(/\D/g, '')
-    nuevoEmpleado.value.salario_base = stringNumerico ? parseFloat(stringNumerico) : null
-  }
-})
-
-const parametroVigente = computed(() => {
-  return parametrosLegales.value.find((item) => item.anio === currentYear)
-})
-
-const obtenerMensajeError = (error, fallback) => {
-  return error.response?.data?.message || error.response?.data?.detail || fallback
-}
-
-const cargarEmpleados = async () => {
-  cargandoLista.value = true
-  try {
-    const res = await api.get('/empleados/')
-    empleados.value = res.data
-  } catch (error) {
-    apiError.value = obtenerMensajeError(error, 'No se pudo cargar la lista de empleados.')
-  } finally {
-    cargandoLista.value = false
-  }
-}
-
-const cargarParametros = async () => {
-  cargandoParametros.value = true
-  try {
-    const res = await api.get('/parametros/')
-    parametrosLegales.value = res.data
-  } catch (error) {
-    console.error('No se pudieron cargar los parámetros legales', error)
-  } finally {
-    cargandoParametros.value = false
-  }
-}
-
-const validarEmpleado = () => {
-  const nombre = nuevoEmpleado.value.nombre.trim()
-  const documento = nuevoEmpleado.value.identificacion.trim()
-  const salario = Number(nuevoEmpleado.value.salario_base)
-
-  if (!nombre) return 'El nombre es obligatorio.'
-  if (!documento) return 'La identificación es obligatoria.'
-  if (!salario || salario <= 0) return 'El salario base debe ser mayor que cero.'
-
-  if (nuevoEmpleado.value.tipo_salario === 'INTEGRAL' && parametroVigente.value) {
-    const minimoIntegral = Number(parametroVigente.value.smmlv) * 13
-    if (salario < minimoIntegral) {
-      return `El salario integral para ${currentYear} debe ser al menos $ ${Number(minimoIntegral).toLocaleString('es-CO')}.`
+    const load = async () => {
+      loading.value = true
+      try {
+        const res = await api.get('/empleados/')
+        empleados.value = res.data
+      } catch (err: any) {
+        const data = err?.response?.data || {}
+        error.value = data.message || data.detail || 'No se pudieron cargar los empleados.'
+      } finally {
+        loading.value = false
+      }
     }
-  }
 
-  return ''
-}
+    const extractApiError = (err: any, fallback: string) => {
+      const data = err?.response?.data || {}
+      const message = data.message || data.detail
+      const details = data.details
 
-const guardarEmpleado = async () => {
-  errorSalario.value = ''
-  apiError.value = ''
-  formError.value = ''
-  successMessage.value = ''
+      if (Array.isArray(details) && details.length > 0) {
+        const formatted = details
+          .map((item: any) => item?.msg || item?.message || item?.detail)
+          .filter(Boolean)
+          .join(' | ')
+        return formatted || message || fallback
+      }
 
-  const validacion = validarEmpleado()
-  if (validacion) {
-    if (validacion.includes('salario integral')) {
-      errorSalario.value = validacion
-    } else {
-      formError.value = validacion
+      if (typeof details === 'string' && details.trim()) {
+        return details
+      }
+
+      return message || fallback
     }
-    return
-  }
-  
-  cargando.value = true
-  try {
-    const payload = {
-      nombre: nuevoEmpleado.value.nombre,
-      documento: nuevoEmpleado.value.identificacion,
-      tipo_salario: nuevoEmpleado.value.tipo_salario,
-      salario_base: parseFloat(nuevoEmpleado.value.salario_base)
+
+    const crearEmpleado = async () => {
+      error.value = ''
+      success.value = ''
+
+      const nombre = form.value.nombre.trim()
+      const documento = form.value.documento.trim()
+      const rawSalario = form.value.salario_base.trim()
+      if (!nombre || !documento || !rawSalario) {
+        error.value = 'Nombre, documento y salario base son obligatorios.'
+        return
+      }
+
+      const normalized = rawSalario.replace(/\./g, '').replace(',', '.')
+      const salario = Number(normalized)
+      if (Number.isNaN(salario) || salario <= 0) {
+        error.value = 'El salario base debe ser un número válido mayor a 0.'
+        return
+      }
+
+      saving.value = true
+      try {
+        await api.post('/empleados/', {
+          nombre,
+          documento,
+          salario_base: salario,
+          tipo_salario: form.value.tipo_salario
+        })
+        success.value = 'Empleado creado correctamente.'
+        form.value = {
+          nombre: '',
+          documento: '',
+          salario_base: '',
+          tipo_salario: 'ORDINARIO'
+        }
+        await load()
+      } catch (err: any) {
+        error.value = extractApiError(err, 'No se pudo crear el empleado.')
+      } finally {
+        saving.value = false
+      }
     }
-    
-    await api.post('/empleados/', payload)
-    await cargarEmpleados()
-    successMessage.value = 'Empleado creado correctamente.'
-    cerrarFormulario(true)
-  } catch (error) {
-    apiError.value = obtenerMensajeError(error, 'Ocurrió un error interno en el motor de nómina (Backend).')
-  } finally {
-    cargando.value = false
+
+    const eliminarEmpleado = async (empleado: any) => {
+      const ok = window.confirm(`¿Eliminar a ${empleado.nombre} (${empleado.documento})?`)
+      if (!ok) return
+
+      error.value = ''
+      success.value = ''
+      deletingId.value = empleado.id
+      try {
+        await api.delete(`/empleados/${empleado.id}`)
+        success.value = 'Empleado eliminado correctamente.'
+        await load()
+      } catch (err: any) {
+        error.value = extractApiError(err, 'No se pudo eliminar el empleado.')
+      } finally {
+        deletingId.value = null
+      }
+    }
+
+    onMounted(load)
+    return { empleados, loading, form, crearEmpleado, eliminarEmpleado, saving, deletingId, error, success }
   }
 }
-
-const cerrarFormulario = (mantenerMensaje = false) => {
-  mostrarFormulario.value = false
-  nuevoEmpleado.value = { ...empleadoVacio }
-  errorSalario.value = ''
-  apiError.value = ''
-  formError.value = ''
-  if (!mantenerMensaje) {
-    successMessage.value = ''
-  }
-}
-
-const eliminar = async (id) => {
-  if (confirm("¿Estás seguro de eliminar este empleado?")) {
-     try {
-       await api.delete(`/empleados/${id}`)
-       await cargarEmpleados()
-       successMessage.value = 'Empleado eliminado correctamente.'
-     } catch (error) {
-       apiError.value = obtenerMensajeError(error, 'No se pudo eliminar el empleado.')
-     }
-  }
-}
-
-onMounted(() => {
-  cargarEmpleados()
-  cargarParametros()
-})
 </script>
 
 <style scoped>
-.page {
+.empleados-page {
   display: grid;
-  gap: 1rem;
+  gap: 16px;
 }
 
-.page-head {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 1.25rem 1.4rem;
-  border: 1px solid rgba(30, 51, 77, 0.08);
-  background: linear-gradient(180deg, #fff 0%, #f8fafc 100%);
+.page-header {
+  display: grid;
+  gap: 4px;
 }
 
-.page-head h2 {
-  margin: 0.35rem 0 0.35rem;
-  color: #10253d;
-}
-
-.page-head p {
+.page-header h1 {
   margin: 0;
-  color: #5f7084;
 }
 
-.page-head__actions {
-  display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-}
-
-.eyebrow {
+.page-header p {
   margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #3f67a9;
-  font-size: 0.75rem;
-  font-weight: 700;
+  color: #5f6b7a;
 }
 
-.panel-card,
-.table-card {
-  border: 1px solid rgba(30, 51, 77, 0.08);
+.card {
+  background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
+  border: 1px solid #e3e8ef;
+  border-radius: 16px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  padding: 18px;
+}
+
+.empleado-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 16px;
+}
+
+.field-group {
+  display: grid;
+  gap: 6px;
+}
+
+.field-group--wide {
+  grid-column: 1 / -1;
+}
+
+.empleado-form label {
+  display: block;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #243447;
+}
+
+.empleado-form input,
+.empleado-form select {
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 10px 12px;
   background: #fff;
+  color: #0f172a;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  box-sizing: border-box;
 }
 
-.panel-card__header {
-  padding-bottom: 0.75rem;
-  margin-bottom: 1rem;
-  border-bottom: 1px solid rgba(30, 51, 77, 0.08);
-  font-weight: 700;
-  color: #10253d;
+.empleado-form input:focus,
+.empleado-form select:focus {
+  outline: none;
+  border-color: #0b57a4;
+  box-shadow: 0 0 0 3px rgba(11, 87, 164, 0.12);
 }
 
-.actions-row {
+.actions {
+  grid-column: 1 / -1;
   display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
+  justify-content: flex-end;
+  margin-top: 2px;
 }
 
-.mt-4 { margin-top: 20px; }
-.mt-2 { margin-top: 10px; }
-.text-center { text-align: center; }
-.feedback { margin: 10px 0 0; }
-.feedback.success { color: #19692c; }
-.feedback.error { color: #a61b1b; }
-.feedback.hint { color: #5c6677; }
-.hint { display: block; margin-top: 6px; color: #5c6677; }
+.actions button {
+  min-width: 190px;
+  min-height: 46px;
+  border-radius: 10px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.error {
+  margin: 0;
+  color: #b00020;
+}
+
+.success {
+  margin: 0;
+  color: #0b7a35;
+}
+
+.list-space {
+  display: grid;
+  gap: 10px;
+}
+
+@media (max-width: 760px) {
+  .empleado-form {
+    grid-template-columns: 1fr;
+  }
+
+  .actions {
+    justify-content: stretch;
+  }
+
+  .actions button {
+    width: 100%;
+  }
+}
 </style>

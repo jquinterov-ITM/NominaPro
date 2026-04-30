@@ -134,6 +134,12 @@ npm run dev
 ```
 Accede a: http://localhost:5173
 
+Notas y ajustes reales del proyecto:
+
+- El frontend está implementado con Vite + Vue 3 y requiere `@vitejs/plugin-vue` y `typescript` en `devDependencies`. Si el servidor Vite muestra errores sobre `.vue` al iniciar, ejecutar `npm install` en `frontend` para asegurar que las dependencias estén instaladas.
+- Durante desarrollo el proxy está configurado en `vite.config.js` para reenviar `'/api'` a `http://localhost:9000`. El cliente usa `baseURL` por defecto `'/api'`. Para apuntar a otro backend en tiempo de ejecución, usar la variable de entorno `VITE_API_URL`.
+
+
 
 ## 8. Pruebas
 ### Backend
@@ -177,8 +183,10 @@ pip install -r backend/requirements.txt
 **Windows PowerShell / CMD / macOS / Linux:**
 ```bash
 cd frontend
-npm run test
+npm run build
 ```
+
+Nota: actualmente `frontend/package.json` no define script `test`; los scripts disponibles son `dev`, `build` y `preview`.
 
 
 ## 9. Scripts y verificación rápida
@@ -320,6 +328,7 @@ Respuestas esperadas:
 - Clave: `secret`
 - Roles: `RH_ADMIN`, `PAYROLL_USER`
 - El formulario de inicio de sesión está en la portada; al entrar correctamente, la barra superior deja de mostrar `Invitado`.
+- El módulo de empleados en frontend permite crear, listar y eliminar (con confirmación) usando los endpoints protegidos de `/api/empleados/`.
 
 ## 12. Notas adicionales y solución de problemas
 - Health check: `GET /health` — devuelve `200 OK` con `{ "status": "ok" }` cuando la API está operativa.
@@ -531,6 +540,13 @@ Para verificar el funcionamiento core desde la terminal:
 	# Copia el access_token del resultado para usarlo en los siguientes pasos
 	```
 
+Notas de integración con frontend:
+
+- El frontend envía la petición de login con `application/x-www-form-urlencoded` (no JSON). Si implementas clientes adicionales, respeta ese formato para `POST /api/auth/token`.
+- El token devuelto por la API se guarda en `localStorage` y en el store de Pinia (`src/stores/auth.ts`). El frontend añade automáticamente el header `Authorization: Bearer <token>` a todas las peticiones mediante un interceptor en `src/services/api.ts`.
+- Se implementaron guardas de rutas en `src/router/guards.ts` que redirigen a `/login` cuando no existe token y evitan acceso a rutas protegidas. `Header` y navegación están condicionadas a la autenticación.
+- Logout limpia el token en el store y `localStorage` y redirige a `/login`.
+
 ### 2. Crear Empleado
 
 - **Windows PowerShell:**
@@ -653,8 +669,9 @@ Si `pytest` no se encuentra, activa el entorno virtual y ejecuta:
 - **Todos los sistemas:**
 	```bash
 	cd frontend
-	npm run test
+	npm run build
 	```
+	Nota: actualmente no existe script `test` en `frontend/package.json`; usar `npm run build` como validación rápida de integridad del frontend.
 
  ## Evolución: Parámetros Dinámicos
  Se ha implementado la migración de constantes legales de código a base de datos. 

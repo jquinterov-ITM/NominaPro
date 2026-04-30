@@ -24,7 +24,7 @@
 
 ## Cobertura
 - Cobertura Backend: meta alta en `backend.app.services.nomina_service`.
-- Ejecutar `npm run test` en la carpeta `frontend`.
+- Frontend: en el estado actual no hay script `test`; usar `npm run build` para validar compilación.
 - Ejecutar `python -m pytest` para validar el motor de nómina.
 
 ## Pruebas nuevas recomendadas
@@ -40,7 +40,7 @@
 ### Frontend
 ```cmd
 cd frontend
-npm run test
+npm run build
 ```
 
 ```cmd

@@ -43,3 +43,19 @@ Definir la estructura y criterios de implementación de la SPA en Vue para opera
  - **Filtros de consulta:** `GET /api/nominas/` soporta `?periodo=YYYY-MM` y `GET /api/novedades/` soporta `?empleado_id=` y `?periodo=`. Usar estos filtros desde la UI para reducir tráfico y carga.
 - **Términos:** usar `tipo_salario` en formularios y validaciones (valores `ORDINARIO`/`INTEGRAL`).
  - **Auditoría:** operaciones administrativas (crear/actualizar empleado, eliminar nómina) pueden registrar eventos de auditoría en el backend; la UI no debe exponer esos datos sin autorización (`RH_ADMIN`).
+
+## Implementación actual (resumen)
+
+Estas notas documentan la implementación real añadida al frontend durante el desarrollo del MVP:
+
+- **Stack:** Vue 3 + Vite, Pinia para estado, Vue Router, Axios para HTTP.
+- **Estructura:** `views/`, `components/`, `stores/`, `services/`.
+- **Autenticación:** Login realiza `POST /api/auth/token` enviando `application/x-www-form-urlencoded` (usar `URLSearchParams`). El token JWT se guarda en `localStorage` y en el store de Pinia (`auth`).
+- **Protección de rutas:** Implementado guard global del router que usa `auth` store; rutas protegidas redirigen a `/login` si no hay token.
+- **Header y navegación:** El `Header` (menú) se muestra condicionalmente según `auth.isAuthenticated`. `Logout` limpia el store y `localStorage`.
+- **Servicios HTTP:** `src/services/api.ts` usa `baseURL` por defecto `'/api'` y un *interceptor* que añade `Authorization: Bearer <token>` desde el store. El interceptor maneja `401` limpiando sesión y redirigiendo a `/login`.
+- **Proxy de desarrollo:** `vite.config.js` usa proxy `'/api' -> http://localhost:9000` para evitar CORS en desarrollo. Para producción, configurar `VITE_API_URL`.
+- **Formato de login:** La API espera `Content-Type: application/x-www-form-urlencoded` en `/api/auth/token` (no JSON). El frontend lo maneja correctamente.
+- **Hot reload:** Vite recarga cambios en caliente; instalar dependencias con `npm install` antes de `npm run dev`.
+
+Usar estas referencias para integrar o extender la UI (roles, permisos, validaciones).

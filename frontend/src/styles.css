@@ -1,0 +1,8 @@
+:root{--bg:#f7f9fc;--muted:#6b7280}
+body{font-family:Inter, system-ui, Arial, sans-serif;background:var(--bg);margin:0;color:#111}
+a{color:inherit}
+.container{background:#fff;padding:20px;border-radius:8px;box-shadow:0 2px 6px rgba(11,87,164,0.06)}
+h1{margin:0 0 12px}
+button{background:#0b57a4;color:#fff;border:none;padding:8px 12px;border-radius:6px;cursor:pointer}
+input{padding:8px;border:1px solid #ddd;border-radius:6px}
+label{display:block;font-size:0.85em;color:var(--muted);margin-bottom:4px}
