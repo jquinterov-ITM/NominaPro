@@ -14,7 +14,7 @@ Definir la estructura y criterios de implementación de la SPA en Vue para opera
 |---|---|---|
 | Empleados | Crear, listar y eliminar | Formulario, tabla y confirmación |
 | Novedades | Registrar por período | Upsert y validación por `YYYY-MM` |
-| Nóminas | Liquidar y consultar | Resumen mensual y detalle |
+| Nóminas | Liquidar y consultar | Resumen mensual, filtro por período y agrupación por empleado |
 
 ## Validaciones y UX
 - Validar campos obligatorios, rangos numéricos y formato de período.
@@ -22,8 +22,8 @@ Definir la estructura y criterios de implementación de la SPA en Vue para opera
 - Presentar mensajes claros para errores 400 y 422.
 
 ## Seguridad Frontend
-- Preparar manejo de JWT cuando el login deje de ser demo.
-- Proteger rutas por rol en fases posteriores.
+- JWT demo ya integrado: el frontend obtiene, guarda y reutiliza el token en llamadas protegidas.
+- Guardas de ruta activas para bloquear acceso sin sesión.
 - No exponer secretos en cliente.
 
 ## Calidad
@@ -57,5 +57,8 @@ Estas notas documentan la implementación real añadida al frontend durante el d
 - **Proxy de desarrollo:** `vite.config.js` usa proxy `'/api' -> http://localhost:9000` para evitar CORS en desarrollo. Para producción, configurar `VITE_API_URL`.
 - **Formato de login:** La API espera `Content-Type: application/x-www-form-urlencoded` en `/api/auth/token` (no JSON). El frontend lo maneja correctamente.
 - **Hot reload:** Vite recarga cambios en caliente; instalar dependencias con `npm install` antes de `npm run dev`.
+- **Empleados:** la vista permite crear, listar y eliminar; el formulario usa tarjeta, grid responsive, campo de salario como texto con parseo manual y mensaje de error real de la API.
+- **Mensajería:** el frontend normaliza el formato de error del backend (`message`, `code`, `details`) para no mostrar solo un genérico.
+- **Nóminas:** la vista permite liquidar un mes completo desde `POST /api/nominas/liquidar`, filtrar por período con `GET /api/nominas/?periodo=YYYY-MM` y mostrar la información agrupada por mes y empleado.
 
 Usar estas referencias para integrar o extender la UI (roles, permisos, validaciones).

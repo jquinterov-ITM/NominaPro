@@ -138,6 +138,10 @@ Notas y ajustes reales del proyecto:
 
 - El frontend está implementado con Vite + Vue 3 y requiere `@vitejs/plugin-vue` y `typescript` en `devDependencies`. Si el servidor Vite muestra errores sobre `.vue` al iniciar, ejecutar `npm install` en `frontend` para asegurar que las dependencias estén instaladas.
 - Durante desarrollo el proxy está configurado en `vite.config.js` para reenviar `'/api'` a `http://localhost:9000`. El cliente usa `baseURL` por defecto `'/api'`. Para apuntar a otro backend en tiempo de ejecución, usar la variable de entorno `VITE_API_URL`.
+- La autenticación del frontend usa `application/x-www-form-urlencoded` en `POST /api/auth/token`. El token se guarda en `Pinia` y `localStorage`, y el layout superior desaparece al cerrar sesión.
+- El módulo de empleados ya soporta crear, listar y eliminar con confirmación; el formulario usa una tarjeta con grid responsive para evitar campos montados, especialmente el selector de tipo de salario.
+- Los errores de API se leen con el formato real del backend (`message`, `code`, `details`) y se muestran en pantalla sin perder el motivo exacto del fallo.
+- El módulo de nóminas no es solo un listado: permite liquidar un período completo, filtrar por mes y agrupar el resultado por período y empleado usando `POST /api/nominas/liquidar` y `GET /api/nominas/?periodo=YYYY-MM`.
 
 
 
@@ -187,6 +191,12 @@ npm run build
 ```
 
 Nota: actualmente `frontend/package.json` no define script `test`; los scripts disponibles son `dev`, `build` y `preview`.
+
+Validación útil adicional para este estado del frontend:
+- Abrir `http://localhost:5173`
+- Iniciar sesión con `admin` / `secret`
+- Crear un empleado desde la sección `Empleados`
+- Eliminarlo usando la confirmación para validar el flujo completo de UI + API
 
 
 ## 9. Scripts y verificación rápida

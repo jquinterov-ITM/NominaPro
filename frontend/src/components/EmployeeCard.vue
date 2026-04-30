@@ -5,7 +5,7 @@
       <span class="id">Doc: {{ empleado.documento }}</span>
     </div>
     <div class="meta">Tipo salario: {{ empleado.tipo_salario }}</div>
-    <div class="meta">Salario base: {{ empleado.salario_base }}</div>
+    <div class="meta">Salario base: {{ formatCurrency(empleado.salario_base) }}</div>
     <div class="actions">
       <button class="danger" :disabled="deleting" @click="$emit('delete', empleado)">
         {{ deleting ? 'Eliminando...' : 'Eliminar' }}
@@ -15,11 +15,16 @@
 </template>
 
 <script lang="ts">
+import { formatCurrency } from '../utils/format'
+
 export default {
   emits: ['delete'],
   props: {
     empleado: { type: Object, required: true },
     deleting: { type: Boolean, default: false }
+  },
+  methods: {
+    formatCurrency
   }
 }
 </script>

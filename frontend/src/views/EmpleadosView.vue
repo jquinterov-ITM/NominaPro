@@ -59,6 +59,7 @@
 import { ref, onMounted } from 'vue'
 import api from '../services/api'
 import EmployeeCard from '../components/EmployeeCard.vue'
+import { normalizeForApi } from '../utils/format'
 
 export default {
   components: { EmployeeCard },
@@ -122,19 +123,21 @@ export default {
         return
       }
 
-      const normalized = rawSalario.replace(/\./g, '').replace(',', '.')
-      const salario = Number(normalized)
-      if (Number.isNaN(salario) || salario <= 0) {
+      // Normalizar y validar usando la utilidad compartida
+      const salarioStr = normalizeForApi(rawSalario)
+      const salarioNum = Number(salarioStr)
+      if (Number.isNaN(salarioNum) || salarioNum <= 0) {
         error.value = 'El salario base debe ser un número válido mayor a 0.'
         return
       }
+      // Enviar como cadena normalizada para preservar precisión Decimal en el backend
 
       saving.value = true
       try {
         await api.post('/empleados/', {
           nombre,
           documento,
-          salario_base: salario,
+          salario_base: salarioStr,
           tipo_salario: form.value.tipo_salario
         })
         success.value = 'Empleado creado correctamente.'

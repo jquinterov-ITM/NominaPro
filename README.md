@@ -90,9 +90,11 @@ Este flujo muestra el recorrido real de una liquidacion:
 - Header y navegación visibles solo con sesión activa.
 - Interceptor Axios en `src/services/api.ts` para enviar `Authorization: Bearer <token>`.
 - Manejo automático de `401`: cierre de sesión y redirección a `/login`.
-- Módulo Empleados con crear, listar y eliminar (con confirmación).
+- Módulo Empleados con crear, listar y eliminar (con confirmación), formulario con layout tipo tarjeta y validación manual de salario.
 - Módulo Novedades con formulario y listado.
-- Módulo Nóminas con listado de resultados.
+- Módulo Nóminas con liquidación por mes, filtro por período y agrupación visual por mes y empleado.
+- La vista de empleados ya no depende de controles nativos rígidos para el salario; acepta valores como `1500000` o `1.500.000` y muestra el error real que devuelve la API.
+- El módulo de nóminas usa `POST /api/nominas/liquidar` para generar el período completo y luego consulta `GET /api/nominas/?periodo=YYYY-MM` para listar el historial agrupado.
 
 ## Requisitos previos
 

@@ -26,10 +26,10 @@ jobs:
 
       - name: Run linters (black/isort/ruff)
         run: |
-          pre-commit run --all-files || true
+          pre-commit run --all-files
           # black/isort/ruff checks
-          black --check backend || true
-          isort --check-only backend || true
+          black --check backend
+          isort --check-only backend
 
       - name: Run tests
         run: |
