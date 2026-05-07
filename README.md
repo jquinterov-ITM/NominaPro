@@ -6,9 +6,9 @@ El frontend consume esa API y permite revisar la información desde el navegador
 
 ## Tecnologias
 
-- Backend: FastAPI, SQLAlchemy, Pydantic v2, SQLite.
-- Seguridad: JWT con roles para proteger rutas sensibles.
-- Calidad: pytest, black, isort, pre-commit.
+- Backend: FastAPI, SQLAlchemy, Pydantic v2, SQLite, bcrypt.
+- Seguridad: JWT con roles para proteger rutas sensibles, usuarios almacenados en BD.
+- Calidad: pytest, black, isort, pre-commit, Vitest (frontend).
 - Frontend: Vue 3 + Vite + Pinia + Vue Router + Axios.
 
 ## Estructura del proyecto
@@ -81,6 +81,9 @@ Este flujo muestra el recorrido real de una liquidacion:
 - Token JWT para proteger rutas de liquidacion y eliminacion.
 - Validaciones con Pydantic y reglas de negocio en servicios.
 - El backend usa variables de entorno para `SECRET_KEY`, roles demo y orígenes permitidos.
+- **Usuarios en BD**: autenticación con contraseñas hasheadas (bcrypt) en lugar de usuario demo en memoria.
+- **Validación SMMLV**: el salario no puede ser inferior al SMMLV del año vigente.
+- **Paginación**: todos los endpoints de listado soportan `?page=`, `?limit=`, `?search=`.
 
 ## Frontend implementado (estado real)
 
@@ -316,17 +319,18 @@ Respuesta esperada:
 ### Backend
 
 ```cmd
-.venv\\Scripts\\python -m pytest -q
+.venv\Scripts\python -m pytest -q
 ```
 
 ### Frontend
 
 ```cmd
 cd frontend
-npm run build
+npm install
+npm run test
 ```
 
-Nota: en el estado actual del proyecto no hay script `test` configurado en `frontend/package.json`; los scripts disponibles son `dev`, `build` y `preview`.
+Los tests frontend usan Vitest + jsdom. Ejecuta `npm run test:watch` para modo interactivo.
 
 ## Recursos para Exposicion
 El proyecto incluye un script interactivo y una guia para demostraciones tecnicas de la API:

@@ -82,7 +82,7 @@ export default {
       loading.value = true
       try {
         const res = await api.get('/empleados/')
-        empleados.value = res.data
+        empleados.value = res.data.items || res.data
       } catch (err: any) {
         const data = err?.response?.data || {}
         error.value = data.message || data.detail || 'No se pudieron cargar los empleados.'

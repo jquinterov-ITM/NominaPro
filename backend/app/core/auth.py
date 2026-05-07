@@ -5,6 +5,8 @@ import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 
+from ..db.session import SessionLocal
+from ..repositories.usuario_repository import UsuarioRepository
 from .config import settings
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/token")
@@ -13,25 +15,35 @@ SECRET_KEY = str(settings.SECRET_KEY)
 ALGORITHM = str(settings.ALGORITHM)
 ACCESS_TOKEN_EXPIRE_MINUTES = int(settings.ACCESS_TOKEN_EXPIRE_MINUTES)
 
-_fake_users = {
-    settings.DEMO_USERNAME: {
-        "username": settings.DEMO_USERNAME,
-        "password": settings.DEMO_PASSWORD,
-        "roles": settings.demo_roles_list,
-    }
-}
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
 def authenticate_user(username: str, password: str) -> Optional[dict]:
-    user = _fake_users.get(username)
-    if not user or user.get("password") != password:
-        return None
-    return user
+    db = next(get_db())
+    try:
+        repo = UsuarioRepository(db)
+        usuario = repo.get_by_username(username)
+        if not usuario or not usuario.activo:
+            return None
+        if not repo.verificar_password(usuario, password):
+            return None
+        return {
+            "username": usuario.username,
+            "roles": usuario.roles.split(","),
+            "id": usuario.id,
+        }
+    finally:
+        db.close()
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
-    # Use timezone-aware UTC datetimes and encode `exp` as a POSIX timestamp (int)
     now = datetime.now(timezone.utc)
     if expires_delta:
         expire = now + expires_delta
@@ -51,16 +63,21 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> dict:
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Credenciales de autenticación inválidas.",
             )
-        user = _fake_users.get(username)
-        if user is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Usuario no encontrado.",
-            )
-        roles = payload.get("roles")
-        if not isinstance(roles, list):
-            roles = user.get("roles", [])
-        return {"username": user["username"], "roles": roles}
+        db = next(get_db())
+        try:
+            repo = UsuarioRepository(db)
+            usuario = repo.get_by_username(username)
+            if usuario is None or not usuario.activo:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Usuario no encontrado o inactivo.",
+                )
+            roles = payload.get("roles")
+            if not isinstance(roles, list):
+                roles = usuario.roles.split(",")
+            return {"username": usuario.username, "roles": roles, "id": usuario.id}
+        finally:
+            db.close()
     except jwt.ExpiredSignatureError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expirado."

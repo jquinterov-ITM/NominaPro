@@ -1,15 +1,34 @@
+from __future__ import annotations
+
 from datetime import datetime
 from decimal import Decimal
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from .. import schemas
 from ..core.auth import require_roles
+from ..core.config import settings
 from ..db import models
 from ..db.session import get_db
 
 router = APIRouter()
+
+
+def _validar_smmlv(salario: Decimal, db: Session) -> None:
+    anio_actual = datetime.now().year
+    param_legal = (
+        db.query(models.ParametrosLegales)
+        .filter(models.ParametrosLegales.anio == anio_actual)
+        .first()
+    )
+    smmlv = param_legal.smmlv if param_legal else settings.SMMLV
+    if salario < smmlv:
+        raise HTTPException(
+            status_code=400,
+            detail=f"El salario no puede ser inferior al SMMLV ({anio_actual}): ${smmlv:,.2f}. Usted envió ${salario:,.2f}.",
+        )
 
 
 @router.post(
@@ -34,9 +53,11 @@ def crear_empleado(
             status_code=400, detail="Ya existe un empleado con este documento."
         )
 
-    # 2. Regla R01 y R02: Validación Dominio 2026 (Salario Integral estrictamente >= 13 SMMLV)
+    # 2. Validar salario >= SMMLV
+    _validar_smmlv(empleado_in.salario_base, db)
+
+    # 3. Regla R01 y R02: Validación Dominio 2026 (Salario Integral estrictamente >= 13 SMMLV)
     if empleado_in.tipo_salario == models.TipoSalario.INTEGRAL:
-        # En la vida real, sacarías el año de la fecha de inicio del contrato. Aquí usamos la fecha actual del sistema.
         anio_actual = datetime.now().year
         param_legal = (
             db.query(models.ParametrosLegales)
@@ -50,7 +71,6 @@ def crear_empleado(
                 detail=f"Faltan parámetros legales para el año {anio_actual}. Son requeridos para validar si el salario integral cumple con el tope mínimo.",
             )
 
-        # Fórmula estricta: 13 SMMLV
         minimo_integral = param_legal.smmlv * Decimal("13")
         if empleado_in.salario_base < minimo_integral:
             raise HTTPException(
@@ -58,19 +78,44 @@ def crear_empleado(
                 detail=f"REGLA R01: El salario integral no puede ser inferior a 13 SMMLV. El mínimo para {anio_actual} es ${minimo_integral:,.2f} (usted envió ${empleado_in.salario_base:,.2f}).",
             )
 
-    # 3. Guardar en Base de Datos
+    # 4. Guardar en Base de Datos
     nuevo_empleado = models.Empleado(**empleado_in.model_dump())
     db.add(nuevo_empleado)
     db.commit()
     db.refresh(nuevo_empleado)
 
-    # TODO (R10): Aquí iría la inserción en la tabla de Auditoría de creación de recursos
     return nuevo_empleado
 
 
-@router.get("/", response_model=list[schemas.EmpleadoResponse])
-def listar_empleados(db: Session = Depends(get_db)):
-    return db.query(models.Empleado).all()
+@router.get("/", response_model=schemas.PaginatedResponse[schemas.EmpleadoResponse])
+def listar_empleados(
+    page: int = 1,
+    limit: int = 20,
+    search: Optional[str] = None,
+    db: Session = Depends(get_db),
+):
+    query = db.query(models.Empleado)
+
+    if search:
+        search_filter = f"%{search}%"
+        query = query.filter(
+            (models.Empleado.nombre.ilike(search_filter))
+            | (models.Empleado.documento.ilike(search_filter))
+        )
+
+    total = query.count()
+    total_pages = (total + limit - 1) // limit
+    offset = (page - 1) * limit
+
+    empleados = query.offset(offset).limit(limit).all()
+
+    return schemas.PaginatedResponse(
+        items=empleados,
+        total=total,
+        page=page,
+        limit=limit,
+        total_pages=total_pages,
+    )
 
 
 @router.get("/{empleado_id}", response_model=schemas.EmpleadoResponse)
@@ -113,6 +158,9 @@ def actualizar_empleado(
         raise HTTPException(
             status_code=400, detail="Ya existe otro empleado con este documento."
         )
+
+    # Validar salario >= SMMLV
+    _validar_smmlv(empleado_in.salario_base, db)
 
     # Regla R01/R02: Validación Salario Integral >= 13 SMMLV
     if empleado_in.tipo_salario == models.TipoSalario.INTEGRAL:

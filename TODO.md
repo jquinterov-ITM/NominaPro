@@ -4,29 +4,32 @@
 - Documentación base y guías esenciales en `/docs/`.
 - Backend: `nomina_service`, `nomina_repository` y routers principales implementados.
 - Endpoints CRUD para `empleados`, `novedades` y generación de nóminas disponibles.
-- Seguridad demo (JWT), pruebas unitarias e integración básicas y scripts de arranque documentados.
+- Seguridad JWT con usuarios en BD (bcrypt), pruebas unitarias e integración.
+- Paginación en APIs y validación SMMLV.
+- Tests frontend con Vitest.
 
-## Pendientes (prioridad y seguimiento)
+## Completados Mayo 2026
+- ✅ Usuarios en BD con bcrypt (reemplaza usuario demo en memoria)
+- ✅ Validación salary >= SMMLV al crear/actualizar empleados
+- ✅ Paginación en APIs (`?page=`, `?limit=`, `?search=`)
+- ✅ Tests frontend con Vitest
+- ✅ Tests E2E con Playwright (`tests/e2e/`)
+- ✅ Tests de carga (`tests/load/load_test.py`)
+- ✅ Tests de estrés (`tests/stress/stress_test.py`)
+- ✅ Documentación de pruebas (`docs/06-pruebas.md`)
+- ✅ Documentación actualizada (README.md, docs/)
 
-- Filtros en API: evaluar e implementar (opcional/pendiente):
-	- `GET /api/nominas?periodo=YYYY-MM`
-	- `GET /api/novedades?empleado_id=...` 
-	- Estado: pendiente — mejora futura (evitar carga innecesaria en frontend).
-
-- Auditoría (R10): diseño e implementación de la tabla y endpoints de auditoría.
-- Auditoría (R10): diseño e implementación de la tabla y endpoints de auditoría.
-	- Estado: implementado (esquema mínimo y endpoints `POST /api/auditoria/`, `GET /api/auditoria/` añadidos). Requiere pruebas y validación en entorno local.
+## Pendientes
+- Dockerización del proyecto
+- CI/CD con GitHub Actions
+- Dashboard con métricas
+- Exportar nóminas a PDF/Excel
+- Rate limiting en APIs
 
 ## Prioridad sugerida
-1. Auditoría (R10) — diseño y API mínima para captura de eventos.
-2. Filtros en API según necesidades del frontend.
-3. Mejoras menores y refactorizaciones (si surgen durante pruebas).
+1. Dockerización para reproducibilidad
+2. CI/CD para automatizar tests y build
+3. Dashboard con métricas de nómina
+4. Exportar reportes
 
-## Instrucciones para marcar tareas como completadas
-- Para cambios de documentación o código ya aplicados, deja un comentario en este archivo indicando qué se completó y la fecha.
-- Cuando termines pruebas locales, haz commit manual y actualiza esta sección con la referencia del commit.
-
-## Siguiente paso (táctico)
-- Diseñar el esquema de `Auditoria` y proponer el primer endpoint (`POST /api/auditoria/`) — puedo generar el esquema inicial si quieres.
-
-*Actualizado: 2026-04-14*
+*Actualizado: 2026-05-06*

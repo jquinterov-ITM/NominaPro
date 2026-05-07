@@ -54,12 +54,17 @@
 - Los errores de validación y autorización no exponen detalles internos.
 - CORS depende de la configuración del entorno.
 
+## Autenticación con Usuarios en BD
+- Las credenciales ahora se almacenan en la tabla `usuarios` con contraseñas hasheadas (bcrypt).
+- El usuario `admin` se crea automáticamente al iniciar el backend si no existe.
+- Credenciales por defecto: `admin` / `secret` (definidas en `.env`).
+
 ## Auditoría y Trazabilidad
 - Se añadió la tabla `auditoria` y los endpoints `POST /api/auditoria/` y `GET /api/auditoria/` para registrar eventos administrativos.
 - Acceso restringido: solamente roles `RH_ADMIN` pueden invocar estos endpoints.
 - Recomendación: registrar `usuario_id`, `accion`, `detalle`, `fecha` y considerar en próximas versiones `valor_anterior` y `valor_nuevo` para cambios críticos (salarios, estado de nómina).
 
 ## Notas de alineación con el código
-- **JWT en el repo:** El código implementa JWT demo en `backend/app/core/auth.py` y las rutas usan la dependencia `require_roles` para control de acceso.
-- **Pruebas:** Para probar endpoints protegidos, obtener token en `POST /api/auth/token` usando credenciales demo según `config`.
+- **JWT + Usuarios BD:** El código implementa JWT en `backend/app/core/auth.py` consultando usuarios en la tabla `usuarios`. Las contraseñas se verifican con bcrypt.
+- **Pruebas:** Para probar endpoints protegidos, obtener token en `POST /api/auth/token` usando credenciales de la tabla `usuarios` (por defecto: admin/secret).
 - **Upsert y unicidad:** `POST /api/novedades/` realiza upsert por `(empleado_id, periodo)`; las pruebas de seguridad deben incluir escenarios de intento de duplicación y validación de permisos.

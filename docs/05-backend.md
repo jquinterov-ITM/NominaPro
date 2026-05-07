@@ -14,18 +14,18 @@ Describir la arquitectura, rutas y aspectos operativos del backend (FastAPI) par
 ## Endpoints principales (prefijo `/api`)
 
 - `GET /health` — endpoint de verificación de salud (no requiere prefijo `/api`). Retorna `200 OK` con `{"status": "ok"}` cuando la API está operativa.
-- `POST /api/empleados/` — crear empleado (valida unicidad `documento`, valida integral >= 13 SMMLV según `ParametrosLegales`).
-- `GET /api/empleados/` — listar empleados.
+- `POST /api/empleados/` — crear empleado (valida unicidad `documento`, valida salary >= SMMLV, valida integral >= 13 SMMLV según `ParametrosLegales`).
+- `GET /api/empleados/` — listar empleados (soporta paginación: `?page=`, `?limit=`, `?search=`).
 - `GET /api/empleados/{id}` — obtener empleado.
-- `PUT /api/empleados/{id}` — actualizar empleado (mismas validaciones que creación: unicidad de documento, salario integral >= 13 SMMLV).
+- `PUT /api/empleados/{id}` — actualizar empleado (mismas validaciones que creación: unicidad de documento, salary >= SMMLV, integral >= 13 SMMLV).
 - `DELETE /api/empleados/{id}` — eliminar empleado y cascada lógica sobre novedades/nominas.
 
-- `GET /api/novedades/` — listar todas las novedades.
+- `GET /api/novedades/` — listar novedades (soporta paginación: `?page=`, `?limit=`, `?empleado_id=`, `?periodo=`).
 - `GET /api/novedades/{id}` — obtener novedad.
 - `POST /api/novedades/` — crea o actualiza (upsert) una novedad por `(empleado_id, periodo)`.
 - `DELETE /api/novedades/{id}` — eliminar novedad.
 
-- `GET /api/nominas/` — lista histórico de nóminas.
+- `GET /api/nominas/` — lista histórico de nóminas (soporta paginación: `?page=`, `?limit=`, `?periodo=`).
 - `GET /api/nominas/{id}` — obtener nómina.
 - `POST /api/nominas/liquidar` — orquesta el cálculo masivo de nóminas (usa `services.nomina_service` y `repositories` para persistencia).
 
@@ -33,15 +33,19 @@ Describir la arquitectura, rutas y aspectos operativos del backend (FastAPI) par
 - `GET /api/auditoria/` — lista eventos recientes de auditoría (restringido a `RH_ADMIN`).
 
 ## Seguridad
-- Autenticación JWT integrada (endpoint `POST /api/auth/token` para token demo).
+- Autenticación JWT integrada (endpoint `POST /api/auth/token`).
+- Las credenciales se almacenan en la tabla `usuarios` con contraseñas hasheadas (bcrypt).
+- El usuario `admin` se crea automáticamente al iniciar el backend.
 - Dependencias `require_roles(...)` aplicadas en routers para `RH_ADMIN` y `PAYROLL_USER`.
 
 ## Reglas de negocio críticas implementadas
+- Validación salary >= SMMLV (año vigente) en creación/actualización de empleado.
 - Validación salario integral (>= 13 SMMLV) en creación de empleado.
 - Cálculo de IBC, aportes, FSP y auxilio transporte según `ParametrosLegales`.
 - Unicidad por `(empleado_id, periodo)` para `novedades` y `nominas` (UniqueConstraint).
 
 ## Observaciones y recomendaciones
+- Paginación: todos los endpoints de listado soportan `?page=`, `?limit=`. La respuesta incluye `items`, `total`, `page`, `limit`, `total_pages`.
 - Filtros expuestos: `GET /api/nominas?periodo=YYYY-MM` y `GET /api/novedades?empleado_id=&periodo=` implementados para consultas más eficientes desde el frontend.
 - Auditoría: endpoints `POST /api/auditoria/` y `GET /api/auditoria/` implementados (acceso restringido a `RH_ADMIN`). Considerar ampliar campos de `Auditoria` en siguientes iteraciones (valor_anterior/valor_nuevo).
-- Mantener pruebas de integración que usen tokens demo y limpien registros entre casos para evitar conflictos por unicidad.
+- Mantener pruebas de integración que limpien registros entre casos para evitar conflictos por unicidad.

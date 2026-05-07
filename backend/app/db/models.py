@@ -1,12 +1,20 @@
 import enum
 
-from sqlalchemy import (Column, DateTime, Enum, Integer, Numeric, String, Text,
-                        UniqueConstraint, func)
+from sqlalchemy import (
+    Column,
+    DateTime,
+    Enum,
+    Integer,
+    Numeric,
+    String,
+    Text,
+    UniqueConstraint,
+    func,
+)
 
 from .session import Base
 
 
-# --- ENUMS PARA REGLAS DE NEGOCIO ---
 class TipoSalario(str, enum.Enum):
     ORDINARIO = "ORDINARIO"
     INTEGRAL = "INTEGRAL"
@@ -16,6 +24,17 @@ class EstadoNomina(str, enum.Enum):
     BORRADOR = "BORRADOR"
     LIQUIDADA = "LIQUIDADA"
     CERRADA_DIAN = "CERRADA_DIAN"
+
+
+class Usuario(Base):
+    __tablename__ = "usuarios"
+
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True, index=True, nullable=False)
+    password_hash = Column(String, nullable=False)
+    roles = Column(String, nullable=False)  # CSV: "RH_ADMIN,PAYROLL_USER"
+    activo = Column(Integer, default=1, nullable=False)
+    fecha_creacion = Column(DateTime(timezone=True), server_default=func.now())
 
 
 # --- MODELOS DE DATOS ---

@@ -3,7 +3,7 @@ from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
-from ..core.auth import authenticate_user, create_access_token
+from ..core.auth import authenticate_user, create_access_token, get_current_user
 from ..core.config import settings
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -23,3 +23,11 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
         expires_delta=access_token_expires,
     )
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+@router.get("/me")
+def get_current_user_info(current_user: dict = Depends(get_current_user)):
+    return {
+        "username": current_user.get("username"),
+        "roles": current_user.get("roles", []),
+    }

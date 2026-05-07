@@ -26,7 +26,7 @@ export default {
       loading.value = true
       try {
         const res = await api.get('/novedades/')
-        novedades.value = res.data
+        novedades.value = res.data.items || res.data
       } finally {
         loading.value = false
       }

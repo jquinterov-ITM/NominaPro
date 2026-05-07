@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
@@ -7,20 +7,36 @@ from ..core.auth import require_roles
 from ..db.models import Nomina
 from ..db.session import get_db
 from ..repositories.nomina_repository import NominaRepository
-from ..schemas import NominaLiquidar, NominaResponse
+from ..schemas import NominaLiquidar, NominaResponse, PaginatedResponse
 from ..services.nomina_service import liquidar_todos_empleados
 
 router = APIRouter(prefix="/nominas", tags=["nominas"])
 
 
-@router.get("/", response_model=List[NominaResponse])
+@router.get("/", response_model=PaginatedResponse[NominaResponse])
 def listar_nominas(
-    periodo: str | None = Query(None, description="Filtra por periodo YYYY-MM"),
+    page: int = 1,
+    limit: int = 20,
+    periodo: Optional[str] = Query(None, description="Filtra por periodo YYYY-MM"),
     db: Session = Depends(get_db),
 ):
     """Obtiene el historial de nóminas procesadas, opcionalmente filtrado por periodo."""
     repo = NominaRepository(db)
-    return repo.list_nominas(periodo=periodo)
+    nominas = repo.list_nominas(periodo=periodo)
+
+    total = len(nominas)
+    total_pages = (total + limit - 1) // limit
+    offset = (page - 1) * limit
+
+    items = nominas[offset : offset + limit]
+
+    return PaginatedResponse(
+        items=items,
+        total=total,
+        page=page,
+        limit=limit,
+        total_pages=total_pages,
+    )
 
 
 @router.get("/{nomina_id}", response_model=NominaResponse)

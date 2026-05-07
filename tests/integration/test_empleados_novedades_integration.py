@@ -3,8 +3,7 @@ from uuid import uuid4
 
 from fastapi.testclient import TestClient
 
-from backend.app.db.models import (Novedad, ParametrosLegales, TipoNovedad,
-                                   TipoSalario)
+from backend.app.db.models import Novedad, ParametrosLegales, TipoNovedad, TipoSalario
 from backend.app.db.session import Base, SessionLocal, engine
 from backend.app.main import app
 
@@ -39,7 +38,7 @@ def _ensure_parametros(anio: int = 2026):
             db.refresh(parametro)
 
 
-def _create_employee(headers, documento: str, salario_base: str = "1500000"):
+def _create_employee(headers, documento: str, salario_base: str = "2000000"):
     response = client.post(
         "/api/empleados/",
         json={
@@ -67,7 +66,7 @@ def test_crear_empleado_rechaza_salario_integral_bajo_minimo():
         json={
             "nombre": "Integral Inválido",
             "documento": str(uuid4().int)[:10],
-            "salario_base": "16000000",
+            "salario_base": "15000000",
             "tipo_salario": TipoSalario.INTEGRAL.value,
         },
         headers=headers,

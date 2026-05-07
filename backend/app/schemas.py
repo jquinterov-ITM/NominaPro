@@ -1,10 +1,20 @@
 from datetime import datetime
 from decimal import Decimal
-from typing import Optional
+from typing import Generic, List, Optional, TypeVar
 
 from pydantic import BaseModel, ConfigDict, Field
 
 from .db.models import EstadoNomina, TipoNovedad, TipoSalario
+
+T = TypeVar("T")
+
+
+class PaginatedResponse(BaseModel, Generic[T]):
+    items: List[T]
+    total: int
+    page: int
+    limit: int
+    total_pages: int
 
 
 class ParametrosLegalesBase(BaseModel):

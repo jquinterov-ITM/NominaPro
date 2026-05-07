@@ -95,8 +95,9 @@ export default {
 
     const loadEmployees = async () => {
       const res = await api.get('/empleados/')
+      const items = res.data.items || res.data
       empleadosMap.value = Object.fromEntries(
-        res.data.map((item: any) => [item.id, item.nombre])
+        items.map((item: any) => [item.id, item.nombre])
       )
     }
 
@@ -106,8 +107,9 @@ export default {
       try {
         const params = periodo ? { periodo } : undefined
         const res = await api.get('/nominas/', { params })
-        nominas.value = res.data
-        buildGroups(res.data)
+        const items = res.data.items || res.data
+        nominas.value = items
+        buildGroups(items)
         await loadEmployees()
         success.value = periodo ? `Historial filtrado por ${periodo}.` : 'Historial cargado correctamente.'
       } catch (err: any) {

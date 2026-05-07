@@ -1,4 +1,6 @@
-from typing import List
+from __future__ import annotations
+
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
@@ -6,15 +8,17 @@ from sqlalchemy.orm import Session
 from ..core.auth import require_roles
 from ..db.models import Empleado, Novedad
 from ..db.session import get_db
-from ..schemas import NovedadCreate, NovedadResponse
+from ..schemas import NovedadCreate, NovedadResponse, PaginatedResponse
 
 router = APIRouter(prefix="/novedades", tags=["novedades"])
 
 
-@router.get("/", response_model=List[NovedadResponse])
+@router.get("/", response_model=PaginatedResponse[NovedadResponse])
 def listar_novedades(
-    empleado_id: int | None = Query(None, description="Filtra por empleado_id"),
-    periodo: str | None = Query(None, description="Filtra por periodo YYYY-MM"),
+    page: int = 1,
+    limit: int = 20,
+    empleado_id: Optional[int] = Query(None, description="Filtra por empleado_id"),
+    periodo: Optional[str] = Query(None, description="Filtra por periodo YYYY-MM"),
     db: Session = Depends(get_db),
 ):
     """Retorna historial de novedades, opcionalmente filtrado por empleado y/o periodo"""
@@ -23,7 +27,20 @@ def listar_novedades(
         q = q.filter(Novedad.empleado_id == empleado_id)
     if periodo:
         q = q.filter(Novedad.periodo == periodo)
-    return q.all()
+
+    total = q.count()
+    total_pages = (total + limit - 1) // limit
+    offset = (page - 1) * limit
+
+    novedades = q.order_by(Novedad.id.desc()).offset(offset).limit(limit).all()
+
+    return PaginatedResponse(
+        items=novedades,
+        total=total,
+        page=page,
+        limit=limit,
+        total_pages=total_pages,
+    )
 
 
 @router.get("/{novedad_id}", response_model=NovedadResponse)

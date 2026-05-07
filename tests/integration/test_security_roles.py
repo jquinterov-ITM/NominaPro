@@ -21,7 +21,7 @@ def test_protected_employee_creation_requires_rh_admin_role():
     payload = {
         "nombre": "Prueba Seguridad",
         "documento": "9999999999",
-        "salario_base": "1500000",
+        "salario_base": "2000000",
         "tipo_salario": "ORDINARIO",
     }
 

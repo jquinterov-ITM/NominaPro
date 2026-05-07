@@ -10,6 +10,7 @@
 <script lang="ts">
 import { onMounted } from 'vue'
 import { useAuthStore } from './stores/auth'
+import api from './services/api'
 import Header from './components/Header.vue'
 
 export default {
@@ -17,8 +18,15 @@ export default {
   setup() {
     const authStore = useAuthStore()
 
-    onMounted(() => {
+    onMounted(async () => {
       authStore.initToken()
+      if (authStore.token) {
+        try {
+          await api.get('/api/auth/me')
+        } catch {
+          authStore.logout()
+        }
+      }
     })
 
     return { authStore }

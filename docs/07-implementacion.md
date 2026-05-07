@@ -4,7 +4,7 @@
 ## 1. Requisitos Previos
 - Python 3.11+
 - pip y Git
-- Node.js 18+
+- Node.js 18+ (para frontend)
 - Windows, Linux o macOS
 
 ## 2. Estructura del Proyecto
@@ -187,10 +187,11 @@ pip install -r backend/requirements.txt
 **Windows PowerShell / CMD / macOS / Linux:**
 ```bash
 cd frontend
-npm run build
+npm install
+npm run test
 ```
 
-Nota: actualmente `frontend/package.json` no define script `test`; los scripts disponibles son `dev`, `build` y `preview`.
+Los tests usan Vitest + jsdom. Para modo interactivo: `npm run test:watch`.
 
 Validación útil adicional para este estado del frontend:
 - Abrir `http://localhost:5173`
@@ -679,12 +680,13 @@ Si `pytest` no se encuentra, activa el entorno virtual y ejecuta:
 - **Todos los sistemas:**
 	```bash
 	cd frontend
-	npm run build
+	npm install
+	npm run test
 	```
-	Nota: actualmente no existe script `test` en `frontend/package.json`; usar `npm run build` como validación rápida de integridad del frontend.
+	Los tests frontend usan Vitest. Para ejecutar en modo watch: `npm run test:watch`.
 
  ## Evolución: Parámetros Dinámicos
- Se ha implementado la migración de constantes legales de código a base de datos. 
+ Se ha implementado la migración de constantes legales de código a base de datos.
  - Tabla: `parametros_legales`
  - Campos dinámicos: salud, pensión, FSP, recargos, provisión prima/cesantía/int/vac.
  - Migración: Automática en el arranque mediante `session.py`.
@@ -703,3 +705,26 @@ Si `pytest` no se encuentra, activa el entorno virtual y ejecuta:
  - **Modelos:** `ParametrosLegales`, `Empleado`, `Novedad`, `Nomina` están implementados en `backend/app/db/models.py` y los esquemas en `backend/app/schemas.py`.
  - **Filtros implementados:** `GET /api/nominas?periodo=YYYY-MM` y `GET /api/novedades?empleado_id=&periodo=` ya están disponibles en los routers; preferir uso de filtros desde el frontend para eficiencia.
  - **Auditoría:** Se añadieron endpoints `POST /api/auditoria/` y `GET /api/auditoria/` para trazabilidad administrativa (acceso `RH_ADMIN`).
+
+## Novedades Recientes (2026-05)
+
+### Usuarios en Base de Datos
+- Las credenciales ahora se almacenan en la tabla `usuarios` con contraseñas hasheadas (bcrypt).
+- El usuario `admin` se crea automáticamente al iniciar el backend si no existe.
+- Credenciales por defecto: `admin` / `secret`.
+
+### Validación SMMLV
+- Al crear o actualizar empleados, el sistema valida que el salario base no sea inferior al SMMLV del año vigente.
+- Para salario integral, se mantiene la regla de 13 SMMLV mínimos.
+
+### Paginación en APIs
+- Todos los endpoints de listado ahora soportan paginación:
+  - `?page=1` - página actual (default: 1)
+  - `?limit=20` - elementos por página (default: 20)
+  - `?search=test` - búsqueda por nombre o documento (solo empleados)
+- La respuesta ahora incluye: `items`, `total`, `page`, `limit`, `total_pages`.
+
+### Tests Frontend
+- Se agregó Vitest para tests unitarios en el frontend.
+- Ejecutar `npm run test` para correr los tests.
+- Archivos de test: `src/**/*.test.ts`

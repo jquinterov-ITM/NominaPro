@@ -24,7 +24,7 @@ def test_novedades_and_nominas_filters():
     empleado_payload = {
         "nombre": "Filter Test",
         "documento": f"FT-{str(uuid4().int)[:10]}",
-        "salario_base": "1500000.00",
+        "salario_base": "2000000.00",
         "tipo_salario": "ORDINARIO",
     }
     res_emp = client.post("/api/empleados/", json=empleado_payload, headers=headers)
@@ -55,8 +55,8 @@ def test_novedades_and_nominas_filters():
     res = client.get(f"/api/novedades/?empleado_id={emp_id}&periodo=2026-04")
     assert res.status_code == 200
     data = res.json()
-    assert len(data) == 1
-    assert data[0]["periodo"] == "2026-04"
+    assert data["total"] == 1
+    assert data["items"][0]["periodo"] == "2026-04"
 
     # Insert nominas directly via DB session
     db = SessionLocal()
@@ -85,7 +85,4 @@ def test_novedades_and_nominas_filters():
     resn = client.get("/api/nominas/?periodo=2026-04")
     assert resn.status_code == 200
     nd = resn.json()
-    assert any(item["periodo"] == "2026-04" for item in nd)
-    assert all(
-        item["periodo"] == "2026-04" for item in nd if item["periodo"] == "2026-04"
-    )
+    assert any(item["periodo"] == "2026-04" for item in nd["items"])

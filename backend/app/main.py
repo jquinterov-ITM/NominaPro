@@ -8,14 +8,26 @@ from fastapi.responses import JSONResponse
 
 from .api import auditoria, auth, empleados, nominas, novedades, parametros
 from .core.config import settings
-from .db import models
-from .db.session import Base, engine, ensure_sqlite_nomina_schema
+from .db.session import Base, SessionLocal, engine, ensure_sqlite_nomina_schema
+from .repositories.usuario_repository import UsuarioRepository
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
     ensure_sqlite_nomina_schema()
+
+    db = SessionLocal()
+    try:
+        repo = UsuarioRepository(db)
+        repo.seed_admin_if_not_exists(
+            username=settings.DEMO_USERNAME,
+            password=settings.DEMO_PASSWORD,
+            roles="RH_ADMIN,PAYROLL_USER",
+        )
+    finally:
+        db.close()
+
     yield
 
 

@@ -76,7 +76,7 @@ def test_liquidar_nomina_crea_registro_y_rechaza_periodo_duplicado():
     employee = _create_employee(
         headers,
         documento=str(uuid4().int)[:10],
-        salario_base="1600000",
+        salario_base="2000000",
         tipo_salario=TipoSalario.ORDINARIO.value,
     )
 

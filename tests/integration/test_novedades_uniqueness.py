@@ -23,7 +23,7 @@ def test_novedad_upsert_por_empleado_y_periodo():
         json={
             "nombre": "Empleado Prueba",
             "documento": documento,
-            "salario_base": "1000000",
+            "salario_base": "2000000",
             "tipo_salario": "ORDINARIO",
         },
     )
@@ -50,10 +50,11 @@ def test_novedad_upsert_por_empleado_y_periodo():
     assert second_json["tipo"] == "BONIFICACION"
     assert second_json["valor"] == "75000.00"
 
-    novedades = client.get("/api/novedades/").json()
+    response = client.get("/api/novedades/")
+    data = response.json()
     matching = [
         nov
-        for nov in novedades
+        for nov in data["items"]
         if nov["empleado_id"] == empleado_id and nov["periodo"] == "2026-01"
     ]
     assert len(matching) == 1
